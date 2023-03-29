@@ -1,0 +1,1 @@
+Making a dice-based civilization type game in Javascript. This is a prototype for nailing down some concepts and getting things going. I have quite a few versions of this floating around so this repo can become the definitive version.

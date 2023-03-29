@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tower of Dice</title>
+    <style>
+      #text {
+        cursor: pointer;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+      }
+    </style>
+  </head>
+	<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+  <body>
+	<div id="Wheat">0 wheat</div><br>
+	<div id = 'diceArea'><!--<img id='1' src='./onedie.png' draggable="true" ondragstart="drag(event)" dieVal='1'></img>
+	<img id='2' src='./twodie.png' draggable="true" ondragstart="drag(event)" dieVal='2'></img>--></div>
+	<div id = 'cardArea'>
+		
+	</div>
+	<img src='./emptydie.png' ondrop="drop(event, pickWheat)" ondragover="allowDrop(event)"></img><br><br>
+	<div id='buttonArea'><button onclick="startDay()">Start the Day</button></div>
+	<audio autoplay='false' controls='false' src='./roll.wav' id='rollAudio' hidden></audio>
+  </body>
+  
+  <script>
+  var wh = 4;
+  var population = 2;
+  
+  function allowDrop(event){
+	event.preventDefault();
+  }
+  
+  function drag(event){
+	event.dataTransfer.setData("text", event.target.id);
+  }
+  
+  // Using callback to allow cards to specify function on the fly.
+  function drop(event, callback){
+	event.preventDefault();
+	var selDie = event.dataTransfer.getData("text");
+	callback(Number($("#"+selDie).data("dieVal")));
+	//wh += Number($("#"+selDie).data("dieVal"));
+	document.getElementById(event.dataTransfer.getData("text")).remove();
+	//document.getElementById('Wheat').innerHTML = wh + " wheat";
+  }
+  
+  function addWheat(amount){
+	wh += amount;
+	document.getElementById('Wheat').innerHTML = wh + " wheat";
+  }
+  
+  function pickWheat(){
+	wh += 2;
+	document.getElementById('Wheat').innerHTML = wh + " wheat";
+  }
+  
+  function startDay(){
+	document.getElementById("cardArea").innerHTML = '';
+	createScroungingCard();
+	wh -= population;
+	if (wh < 0){
+		generateDice(0)
+		wh = 0;
+	}
+	else{
+		for (let i = 0; i < population; i++){
+			generateDice(0);
+		}
+	}
+	document.getElementById('Wheat').innerHTML = wh + " wheat";
+	$("#rollAudio")[0].play();
+  }
+  function generateDice(value){
+	var dieVal = 0;
+	if (value == 0){
+		dieVal = getRandomDieRoll();
+	}
+	else{
+		dieVal = value;
+	}
+	var id = generateId();
+	var imgsrc = lookupImageSource(dieVal);
+	var element = "<img id='"+id+"' src='"+imgsrc+"' draggable='true' ondragstart='drag(event)'></img>";
+	$("#diceArea").append(element);
+	$("#"+id).data("dieVal", dieVal);
+	return 0;
+	}
+	
+	function getRandomDieRoll(){
+		return Math.floor(Math.random()*6)+1;
+	}
+	
+	function lookupImageSource(value){
+		switch(value)
+		{
+			case 1:
+				return "./onedie.png";
+			case 2:
+				return "./twodie.png";
+			case 3:
+				return "./threedie.png";
+			case 4:
+				return "./fourdie.png";
+			case 5:
+				return "./fivedie.png";
+			case 6:
+				return "./sixdie.png";
+			case 7:
+				return "./sevendie.png";
+			case 8:
+				return "./eightdie.png";
+			case 9:
+				return "./ninedie.png";
+			case 10:
+				return "./tendie.png";
+			default:
+				return "./emptydie.png";
+		
+		}
+	}
+	
+	function generateId(){
+		var text = '';
+		var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+		for(var i=0; i < 24; i++)
+		{
+			text += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
+
+		return text;
+	}
+	function createScroungingCard(){
+		var card = "<div id='scrounge' style='border: 2px solid; border-radius: 5px;'>Scrounge<BR><img src='./emptydie.png' ondrop='drop(event, pickWheat)' ondragover='allowDrop(event)'></img></div>";
+		document.getElementById("cardArea").innerHTML += card;
+	}
+  </script>
+</html>
