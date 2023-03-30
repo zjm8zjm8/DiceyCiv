@@ -49,7 +49,7 @@
   </body>
   
   <script>
-  var wh = 4;
+  var food = 4;
   var wood = 0;
   var population = 2;
   var cardsAssigned = 0;
@@ -58,13 +58,16 @@
   window.onload = function(e){
 	showStoryIntro();
 	createScroungingCard();
-	createFarmingCard();
-	createSticksCard();
+	createChapter0Buttons();
 	repaintResources();
   }
   
   function showStoryIntro(){
-	alert("Legend tells of a dicey kingdom that existed long ago. A land where dice were free to roll how they may. It was destroyed by the FOUR DICEMEN OF THE APOCALYPSE. You are in an idyllic meadow, and the thought strikes you that you might be the one who could rebuild the KINGDOM OF DICE.");
+	alert("Legend tells of a dicey kingdom that existed long ago. " +
+	"A land where dice were free to roll how they may. A land where dice could do more than just survive. " +
+	"It was destroyed by the FOUR DICEMEN OF THE APOCALYPSE. " +
+	"You are in an idyllic meadow, and the thought strikes you that you might be the one " + 
+	"who could rebuild the KINGDOM OF DICE.");
   }
   
   function allowDrop(event){
@@ -75,6 +78,47 @@
 	event.dataTransfer.setData("text", event.target.id);
   }
   
+  function createChapter0Buttons(){
+	document.getElementById("buttonArea").innerHTML += "<br>" +
+	"<button id=buyfarmButton onclick='buyfarmcard()'>Start Farming (requires 5 food)</button><br>" +
+	"<button id=buystickButton onclick='buystickcard()'>Start Gathering Sticks (requires 8 food)</button><br>" +
+	"<button id=completeChapter0Button onclick='completeChapter0()'>Build your first hut (requires 5 wood)</button>";
+  }
+  
+  function buyfarmcard(){
+	if (food < 5){
+	return false
+	}
+	else{
+		createFarmingCard();
+		food -= 5;
+		$("#buyfarmButton").remove();
+	}
+	repaintResources();
+  }
+  
+  function buystickcard(){
+	if (food < 8){
+		return false}
+		else{
+		createSticksCard();
+		food -= 8;
+		$("#buystickButton").remove();
+		}
+	repaintResources();
+  }
+  
+  function completeChapter0(){
+	if (wood < 5){
+		return false
+	}
+	else{
+		wood -= 5;
+		$("#completeChapter0Button").remove();
+		alert("You have done it! The foundation of your new kingdom has been laid. Now, you must continue to build a glorious kingdom. Beware, your activity will not go unnoticed by the FOUR DICEMEN OF THE APOCALYPSE for long...");
+	}
+	repaintResources();
+  }
   // Using callback to allow cards to specify function on the fly.
   function drop(event, callback){
 	event.preventDefault();
@@ -91,12 +135,12 @@
   }
   
   function scroungeWheat(){
-	wh += 2;
+	food += 2;
 	repaintResources();
 	removeDie();
   }
   function farmWheat(amount){
-	wh += amount;
+	food += amount;
 	repaintResources();
 	removeDie();
   }
@@ -110,11 +154,11 @@
   }
   
   function startDay(){
-	wh -= population;
+	food -= population;
 	document.getElementById('diceArea').innerHTML = ""; // Clear the dice.
-	if (wh < 0){
+	if (food < 0){
 		generateDice(0)
-		wh = 0;
+		food = 0;
 	}
 	else{
 		for (let i = 0; i < population; i++){
@@ -205,11 +249,11 @@
 		}
 	}
 	function repaintResources(){
-		if (wh <= 0){
-			document.getElementById('Wheat').innerHTML = "<font color=red>" + wh + "</font> food";
+		if (food <= 0){
+			document.getElementById('Wheat').innerHTML = "<font color=red>" + food + "</font> food";
 		}
 		else{
-			document.getElementById('Wheat').innerHTML = wh + " food";
+			document.getElementById('Wheat').innerHTML = food + " food";
 		}
 		document.getElementById('Wood').innerHTML = wood + " wood";
 	}
