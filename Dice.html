@@ -53,11 +53,18 @@
   var wood = 0;
   var population = 2;
   var cardsAssigned = 0;
+  var currentDie;
   
   window.onload = function(e){
+	showStoryIntro();
 	createScroungingCard();
 	createFarmingCard();
+	createSticksCard();
 	repaintResources();
+  }
+  
+  function showStoryIntro(){
+	alert("Legend tells of a dicey kingdom that existed long ago. A land where dice were free to roll how they may. It was destroyed by the FOUR DICEMEN OF THE APOCALYPSE. You are in an idyllic meadow, and the thought strikes you that you might be the one who could rebuild the KINGDOM OF DICE.");
   }
   
   function allowDrop(event){
@@ -72,23 +79,34 @@
   function drop(event, callback){
 	event.preventDefault();
 	var selDie = event.dataTransfer.getData("text");
+	currentDie = event.dataTransfer.getData("text");
 	callback(Number($("#"+selDie).data("dieVal")));
-	//wh += Number($("#"+selDie).data("dieVal"));
-	document.getElementById(event.dataTransfer.getData("text")).remove();
   }
   
-  function addWheat(amount){
-	wh += amount;
-	repaintResources();
+  function removeDie()
+  {
+	if (currentDie.length > 0)
+		document.getElementById(currentDie).remove();
+	currentDie = "";
   }
   
   function scroungeWheat(){
 	wh += 2;
 	repaintResources();
+	removeDie();
   }
   function farmWheat(amount){
 	wh += amount;
 	repaintResources();
+	removeDie();
+  }
+  function gatherSticks(amount){
+	if (amount < 4){
+		return false;
+	}
+	wood += amount - 3;
+	repaintResources();
+	removeDie();
   }
   
   function startDay(){
@@ -172,6 +190,10 @@
 	}
 	function createFarmingCard(){
 		var card = "<div id='farm' style='border: 2px solid; border-radius: 5px; background-color: #dddd00'>Farm Wheat<BR>Gain X food.<br><img src='./images/emptydie.png' ondrop='drop(event, farmWheat)' ondragover='allowDrop(event)'></img></div>";
+		addCard(card);
+	}
+	function createSticksCard(){
+		var card = "<div id='sticks' style='border: 2px solid; border-radius: 5px; background-color: #128822'>Gather Sticks<BR>Gain X-3 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, gatherSticks)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
 	function addCard(cardData){
