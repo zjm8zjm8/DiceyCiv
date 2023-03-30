@@ -20,16 +20,42 @@
 	<div id = 'diceArea'><!--<img id='1' src='./onedie.png' draggable="true" ondragstart="drag(event)" dieVal='1'></img>
 	<img id='2' src='./twodie.png' draggable="true" ondragstart="drag(event)" dieVal='2'></img>--></div>
 	<div id = 'cardArea'>
-		
+		<table>
+			<tr>
+				<td id="cardArea1">
+				</td>
+				<td id="cardArea2">
+				</td>
+				<td id="cardArea3">
+				</td>
+				<td id="cardArea4">
+				</td>
+			</tr>
+			<tr>
+				<td id="cardArea5">
+				</td>
+				<td id="cardArea6">
+				</td>
+				<td id="cardArea7">
+				</td>
+				<td id="cardArea8">
+				</td>
+			</tr>
+		</table>
 	</div>
-	<img src='./emptydie.png' ondrop="drop(event, pickWheat)" ondragover="allowDrop(event)"></img><br><br>
 	<div id='buttonArea'><button onclick="startDay()">Start the Day</button></div>
-	<audio autoplay='false' controls='false' src='./roll.wav' id='rollAudio' hidden></audio>
+	<audio autoplay='false' controls='false' src='./sounds/roll.wav' id='rollAudio' hidden></audio>
   </body>
   
   <script>
   var wh = 4;
   var population = 2;
+  var cardsAssigned = 0;
+  
+  window.onload = function(e){
+	createScroungingCard();
+	repaintResources();
+  }
   
   function allowDrop(event){
 	event.preventDefault();
@@ -51,18 +77,17 @@
   
   function addWheat(amount){
 	wh += amount;
-	document.getElementById('Wheat').innerHTML = wh + " wheat";
+	repaintResources();
   }
   
   function pickWheat(){
 	wh += 2;
-	document.getElementById('Wheat').innerHTML = wh + " wheat";
+	repaintResources();
   }
   
   function startDay(){
-	document.getElementById("cardArea").innerHTML = '';
-	createScroungingCard();
 	wh -= population;
+	document.getElementById('diceArea').innerHTML = "";
 	if (wh < 0){
 		generateDice(0)
 		wh = 0;
@@ -72,7 +97,7 @@
 			generateDice(0);
 		}
 	}
-	document.getElementById('Wheat').innerHTML = wh + " wheat";
+	repaintResources();
 	$("#rollAudio")[0].play();
   }
   function generateDice(value){
@@ -99,27 +124,27 @@
 		switch(value)
 		{
 			case 1:
-				return "./onedie.png";
+				return "./images/onedie.png";
 			case 2:
-				return "./twodie.png";
+				return "./images/twodie.png";
 			case 3:
-				return "./threedie.png";
+				return "./images/threedie.png";
 			case 4:
-				return "./fourdie.png";
+				return "./images/fourdie.png";
 			case 5:
-				return "./fivedie.png";
+				return "./images/fivedie.png";
 			case 6:
-				return "./sixdie.png";
+				return "./images/sixdie.png";
 			case 7:
-				return "./sevendie.png";
+				return "./images/sevendie.png";
 			case 8:
-				return "./eightdie.png";
+				return "./images/eightdie.png";
 			case 9:
-				return "./ninedie.png";
+				return "./images/ninedie.png";
 			case 10:
-				return "./tendie.png";
+				return "./images/tendie.png";
 			default:
-				return "./emptydie.png";
+				return "./images/emptydie.png";
 		
 		}
 	}
@@ -136,8 +161,19 @@
 		return text;
 	}
 	function createScroungingCard(){
-		var card = "<div id='scrounge' style='border: 2px solid; border-radius: 5px;'>Scrounge<BR><img src='./emptydie.png' ondrop='drop(event, pickWheat)' ondragover='allowDrop(event)'></img></div>";
-		document.getElementById("cardArea").innerHTML += card;
+		var card = "<div id='scrounge' style='border: 2px solid; border-radius: 5px;'>Scrounge<BR><img src='./images/emptydie.png' ondrop='drop(event, pickWheat)' ondragover='allowDrop(event)'></img></div>";
+		addCard(card);
+	}
+	function addCard(cardData){
+		if (cardsAssigned < 8){
+			cardsAssigned++;
+			let cardstr = "cardArea" + cardsAssigned + "";
+			console.log(cardstr);
+			document.getElementById(cardstr).innerHTML += cardData;
+		}
+	}
+	function repaintResources(){
+		document.getElementById('Wheat').innerHTML = wh + " wheat";
 	}
   </script>
 </html>
