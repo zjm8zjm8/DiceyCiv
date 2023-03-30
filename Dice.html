@@ -93,7 +93,7 @@
   
   function startDay(){
 	wh -= population;
-	document.getElementById('diceArea').innerHTML = "";
+	document.getElementById('diceArea').innerHTML = ""; // Clear the dice.
 	if (wh < 0){
 		generateDice(0)
 		wh = 0;
@@ -171,7 +171,7 @@
 		addCard(card);
 	}
 	function createFarmingCard(){
-		var card = "<div id='scrounge' style='border: 2px solid; border-radius: 5px; background-color: #dddd00'>Farm Wheat<BR>Gain X food.<br><img src='./images/emptydie.png' ondrop='drop(event, farmWheat)' ondragover='allowDrop(event)'></img></div>";
+		var card = "<div id='farm' style='border: 2px solid; border-radius: 5px; background-color: #dddd00'>Farm Wheat<BR>Gain X food.<br><img src='./images/emptydie.png' ondrop='drop(event, farmWheat)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
 	function addCard(cardData){
@@ -183,7 +183,13 @@
 		}
 	}
 	function repaintResources(){
-		document.getElementById('Wheat').innerHTML = wh + " food";
+		if (wh <= 0){
+			document.getElementById('Wheat').innerHTML = "<font color=red>" + wh + "</font> food";
+		}
+		else{
+			document.getElementById('Wheat').innerHTML = wh + " food";
+		}
+		document.getElementById('Wood').innerHTML = wood + " wood";
 	}
   </script>
 </html>
