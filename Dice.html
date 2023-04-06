@@ -15,7 +15,9 @@
   src="https://code.jquery.com/jquery-3.6.0.min.js"
   integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
   crossorigin="anonymous"></script>
+	<link href="./styles/style.css" rel="stylesheet" type="text/css" />
   <body>
+	<div id="Day">Day 0</div><br>
 	<div id="Wheat">0 food</div><br>
 	<div id="Wood">0 wood</div><br>
 	<div id = 'diceArea'><!--<img id='1' src='./onedie.png' draggable="true" ondragstart="drag(event)" dieVal='1'></img>
@@ -49,6 +51,7 @@
   </body>
   
   <script>
+  var day = 0;
   var food = 4;
   var wood = 0;
   var population = 2;
@@ -154,6 +157,7 @@
   }
   
   function startDay(){
+	day += 1;
 	food -= population;
 	document.getElementById('diceArea').innerHTML = ""; // Clear the dice.
 	if (food < 0){
@@ -229,15 +233,15 @@
 		return text;
 	}
 	function createScroungingCard(){
-		var card = "<div id='scrounge' style='border: 2px solid; border-radius: 5px; background-color: #dddd00'>Scrounge<BR>Gain 2 food.<br><img src='./images/emptydie.png' ondrop='drop(event, scroungeWheat)' ondragover='allowDrop(event)'></img></div>";
+		var card = "<div id='scrounge' class='card food'>Scrounge<BR>Gain 2 food.<br><img src='./images/emptydie.png' ondrop='drop(event, scroungeWheat)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
 	function createFarmingCard(){
-		var card = "<div id='farm' style='border: 2px solid; border-radius: 5px; background-color: #dddd00'>Farm Wheat<BR>Gain X food.<br><img src='./images/emptydie.png' ondrop='drop(event, farmWheat)' ondragover='allowDrop(event)'></img></div>";
+		var card = "<div id='farm' class='card food'>Farm Wheat<BR>Gain X food.<br><img src='./images/emptydie.png' ondrop='drop(event, farmWheat)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
 	function createSticksCard(){
-		var card = "<div id='sticks' style='border: 2px solid; border-radius: 5px; background-color: #128822'>Gather Sticks<BR>Gain X-3 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, gatherSticks)' ondragover='allowDrop(event)'></img></div>";
+		var card = "<div id='sticks' class='card wood'>Gather Sticks<BR>Gain X-3 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, gatherSticks)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
 	function addCard(cardData){
@@ -249,6 +253,7 @@
 		}
 	}
 	function repaintResources(){
+		document.getElementById("Day").innerHTML = "Day " + day + "";
 		if (food <= 0){
 			document.getElementById('Wheat').innerHTML = "<font color=red>" + food + "</font> food";
 		}

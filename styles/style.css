@@ -1,0 +1,14 @@
+.card {
+	width: 150px;
+	height: 150px;
+	border: 2px solid; 
+	border-radius: 5px;
+}
+
+.food{
+	background-color: #dddd00;
+}
+
+.wood{
+	background-color: #128822;
+}
