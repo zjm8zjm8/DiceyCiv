@@ -3,6 +3,14 @@
 	height: 150px;
 	border: 2px solid; 
 	border-radius: 5px;
+	text-align: center;
+	position: relative;
+}
+
+.card img{
+	display: inline;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .food{
@@ -11,4 +19,11 @@
 
 .wood{
 	background-color: #128822;
+}
+
+button{
+	background-color: #EEEEFF;
+	height: 50px;
+	width: 350px;
+	border-radius: 5px;
 }
