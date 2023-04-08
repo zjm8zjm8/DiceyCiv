@@ -118,7 +118,7 @@
 	else{
 		wood -= 5;
 		$("#completeChapter0Button").remove();
-		alert("You have done it! The foundation of your new kingdom has been laid. Now, you must continue to build a glorious kingdom. Beware, your activity will not go unnoticed by the FOUR DICEMEN OF THE APOCALYPSE for long...");
+		alert("Finally, some real shelter! You are so tired of living in a hastily built lean-to. You have a place to think now. The foundation of your new kingdom has been laid. Beware, your activity will not go unnoticed by the FOUR DICEMEN OF THE APOCALYPSE for long...");
 	}
 	repaintResources();
   }
@@ -244,6 +244,14 @@
 	}
 	function createSticksCard(){
 		var card = "<div id='sticks' class='card wood'>Gather Sticks<BR>Gain X-3 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, gatherSticks)' ondragover='allowDrop(event)'></img></div>";
+		addCard(card);
+	}
+	function createDiscoveryStoneCard(){
+		var card = "<div id='discoveryStone' class='card science'>Discovery: Stone<BR>Find a way to work with stone.<Br>Req. Die: 6<br><img src='./images/emptydie.png' ondrop='drop(event, discoverStone)' ondragover='allowDrop(event)'></img></div>";
+		addCard(card);
+	}
+	function createDiscoveryOrganizationCard(){
+		var card = "<div id='discoveryOrg' class='card science'>Discovery: Stone<BR>Communication is key!<Br>Req. Dice: 1,2<br><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
 	function addCard(cardData){
