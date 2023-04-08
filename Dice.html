@@ -48,6 +48,7 @@
 	</div>
 	<div id='buttonArea'><button onclick="startDay()">Start the Day</button></div>
 	<audio autoplay='false' controls='false' src='./sounds/roll.wav' id='rollAudio' hidden></audio>
+	<audio autoplay='false' controls='false' src='./sounds/victory.wav' id='victoryAudio' hidden></audio>
   </body>
   
   <script>
@@ -118,6 +119,7 @@
 	else{
 		wood -= 5;
 		$("#completeChapter0Button").remove();
+		$("#victoryAudio")[0].play();
 		alert("Finally, some real shelter! You are so tired of living in a hastily built lean-to. You have a place to think now. The foundation of your new kingdom has been laid. Beware, your activity will not go unnoticed by the FOUR DICEMEN OF THE APOCALYPSE for long...");
 	}
 	repaintResources();
