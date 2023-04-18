@@ -15,13 +15,15 @@
   src="https://code.jquery.com/jquery-3.6.0.min.js"
   integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
   crossorigin="anonymous"></script>
+  <script src="
+https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
+"></script>
 	<link href="./styles/style.css" rel="stylesheet" type="text/css" />
   <body>
 	<div id="Day">Day 0</div><br>
 	<div id="Wheat">0 food</div><br>
 	<div id="Wood">0 wood</div><br>
-	<div id = 'diceArea'><!--<img id='1' src='./onedie.png' draggable="true" ondragstart="drag(event)" dieVal='1'></img>
-	<img id='2' src='./twodie.png' draggable="true" ondragstart="drag(event)" dieVal='2'></img>--></div>
+	<div id = 'diceArea'><!--<img id='1' src='./onedie.png' draggable="true" ondragstart="drag(event)" dieVal='1'></img>--></div>
 	<div id = 'cardArea'>
 		<table>
 			<tr>
@@ -58,12 +60,30 @@
   var population = 2;
   var cardsAssigned = 0;
   var currentDie;
+  var gameData = {};
   
   window.onload = function(e){
-	showStoryIntro();
+	gameData.showIntro = true;
+	loadGame();
+	console.log(gameData.showIntro);
+	if (gameData.showIntro == true){
+		showStoryIntro();
+	}
 	createScroungingCard();
 	createChapter0Buttons();
 	repaintResources();
+	gameData.showIntro = false;
+  }
+  
+  function saveGame(){
+	Cookies.set("gameData", JSON.stringify(gameData));
+  }
+  
+  function loadGame(){
+	let x = Cookies.get("gameData");
+	if (typeof x !== 'undefined'){
+		gameData = JSON.parse(x);
+	}
   }
   
   function showStoryIntro(){
@@ -84,9 +104,17 @@
   
   function createChapter0Buttons(){
 	document.getElementById("buttonArea").innerHTML += "<br>" +
-	"<button id=buyfarmButton onclick='buyfarmcard()'>Start Farming (requires 5 food)</button><br>" +
-	"<button id=buystickButton onclick='buystickcard()'>Start Gathering Sticks (requires 8 food)</button><br>" +
+	"<button id=buyfarmButton onclick='buyfarmcard()'>Start Farming (requires 5 food)</button>" +
+	"<button id=buystickButton onclick='buystickcard()'>Start Gathering Sticks (requires 8 food)</button>" +
 	"<button id=completeChapter0Button onclick='completeChapter0()'>Build your first hut (requires 5 wood)</button>";
+  }
+  function skipChapter0(){
+	day = 10;
+	food = 30;
+	wood = 15;
+	buyfarmcard();
+	buystickcard();
+	completeChapter0();
   }
   
   function buyfarmcard(){
@@ -256,11 +284,34 @@
 		var card = "<div id='discoveryOrg' class='card science'>Discovery: Stone<BR>Communication is key!<Br>Req. Dice: 1,2<br><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
+	function createProgressStoneCard(){
+		var card = "<div id='progressStone' class='card science'>Progress: Stone<BR>Stone for other applications.<BR>Total: 8<br><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img></div>";
+		addCard(card);
+	}
+	function createGatherStoneCard(){
+		var card = "<div id='gatherStone' class='card stone'>Gather Stone<BR>Gain 2 stone.<BR>Max Die: 2<br><img src='./images/emptydie.png' ondrop='drop(event, gatherStone)' ondragover='allowDrop(event)'></img></div>";
+		addCard(card);
+	}
+	function createTeamworkCard(){
+		var card = "<div id='teamwork' class='card organization'>Teamwork<BR>Combine 2 dice.<BR><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img></div>";
+		addCard(card);
+	}
+	function createPepTalkCard(){
+		var card = "<div id='pepTalk' class='card organization'>Pep Talk<BR>Add 1 to die value.<br><img src='./images/emptydie.png' ondrop='drop(event, pepTalk)' ondragover='allowDrop(event)'></img></div>";
+		addCard(card);
+	}
+	function createLoggingCard(){
+		var card = "<div id='logging' class='card wood'>Logging<BR>Gain X-1 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, logging)' ondragover='allowDrop(event)'></img></div>";
+		addCard(card);
+	}
+	function createQuarryCard(){
+		var card = "<div id='quarry' class='card stone'>Quarry Stone<BR>Gain X+1 stone.<br>Max Die: 3<br><img src='./images/emptydie.png' ondrop='drop(event, quarryStone)' ondragover='allowDrop(event)'></img></div>";
+		addCard(card);
+	}
 	function addCard(cardData){
 		if (cardsAssigned < 8){
 			cardsAssigned++;
 			let cardstr = "cardArea" + cardsAssigned + "";
-			console.log(cardstr);
 			document.getElementById(cardstr).innerHTML += cardData;
 		}
 	}

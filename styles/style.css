@@ -22,7 +22,15 @@
 }
 
 .science{
-	background-color: #88AAFF;
+	background-color: #80E5FF;
+}
+
+.stone{
+	background-color: #CCCCCC;
+}
+
+.organization{
+	background-color: #5D5DFF
 }
 
 button{
@@ -30,4 +38,5 @@ button{
 	height: 50px;
 	width: 350px;
 	border-radius: 5px;
+	display: block;
 }
