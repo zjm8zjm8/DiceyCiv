@@ -248,10 +248,10 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	unlocks.completedDiscoverStone = true;
 	unlocks.ownsGatherStone = true;
 	unlocks.ownsProgressStone = true;
+	removeCard("discoveryStone");
 	createGatherStoneCard();
 	createProgressStoneCard();
 	removeDie();
-	removeCard("discoveryStone");
   }
   function discoverOrg(amountIn){
 	let amount = Number(amountIn);
@@ -269,10 +269,10 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			unlocks.completedDiscoverOrg = true;
 			unlocks.ownsTeamwork = true;
 			unlocks.ownsPepTalk = true;
+			removeCard("discoveryOrg");
 			createPepTalkCard();
 			createTeamworkCard();
 			removeDie();
-			removeCard("discoveryOrg");
 			secondDieStorage.discoveryOrg = 0;
 		}
 	}
