@@ -155,7 +155,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   
   function buylogcard(){
 	if (wood >= 5 && stone >= 5){
-		$("buylogButton").remove();
+		$("#buylogButton").remove();
 		wood -= 5;
 		stone -= 5;
 		createLoggingCard();
@@ -165,7 +165,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   }
   function buyquarrycard(){
 	if (wood >= 8 && stone >= 3){
-		$("buyquarryButton").remove();
+		$("#buyquarryButton").remove();
 		wood -=8;
 		stone -= 3;
 		createQuarryCard();
@@ -322,6 +322,22 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		}
 	}
   }
+  function logging(amount){
+	if (amount < 4){
+		return false;
+	}
+	wood += amount - 1;
+	repaintResources();
+	removeDie();
+  }
+  function quarryStone(amount){
+	if (amount > 3){
+	return false;
+	}
+	stone += amount + 1;
+	repaintResources();
+	removeDie();
+  }
   
   function startDay(){
 	day += 1;
@@ -461,6 +477,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	
 	}
 	function removeCard(cardName){
+		cardsAssigned--;
 		let x = document.getElementById(cardName);
 		let y = x.parentNode;
 		let z = y.id;
