@@ -23,6 +23,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	<div id="Day">Day 0</div><br>
 	<div id="Wheat">0 food</div><br>
 	<div id="Wood">0 wood</div><br>
+	<div id="Stone">0 stone</div><br>
 	<div id = 'diceArea'><!--<img id='1' src='./onedie.png' draggable="true" ondragstart="drag(event)" dieVal='1'></img>--></div>
 	<div id = 'cardArea'>
 		<table>
@@ -57,10 +58,15 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var day = 0;
   var food = 4;
   var wood = 0;
+  var stone = 0;
   var population = 2;
   var cardsAssigned = 0;
+  var maxCards = 8;//4;
   var currentDie;
   var gameData = {};
+  var unlocks = {};
+  var secondDieStorage = {};
+  var pepTalkUsed = false;
   
   window.onload = function(e){
 	gameData.showIntro = true;
@@ -108,6 +114,11 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	"<button id=buystickButton onclick='buystickcard()'>Start Gathering Sticks (requires 8 food)</button>" +
 	"<button id=completeChapter0Button onclick='completeChapter0()'>Build your first hut (requires 5 wood)</button>";
   }
+  function createChapter1Buttons(){
+	document.getElementById("buttonArea").innerHTML += "<button id=buylogButton onclick='buylogcard()'>Better Axes (requires 5 wood, 5 stone)</button>" +
+	"<button id=buyquarryButton onclick='buyquarrycard()'>Quarry Stone (requires 8 wood, 3 stone)</button>" +
+	"<button id=completeChapter1Button onclick='completeChapter1()'>Build A Grand Bonfire (requires 12 wood, 5 stone)</button>";
+  }
   function skipChapter0(){
 	day = 10;
 	food = 30;
@@ -126,6 +137,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		food -= 5;
 		$("#buyfarmButton").remove();
 	}
+	unlocks.ownsFarmingCard = true;
 	repaintResources();
   }
   
@@ -137,9 +149,41 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		food -= 8;
 		$("#buystickButton").remove();
 		}
+	unlocks.ownsStickCard = true;
 	repaintResources();
   }
   
+  function buylogcard(){
+	if (wood >= 5 && stone >= 5){
+		$("buylogButton").remove();
+		wood -= 5;
+		stone -= 5;
+		createLoggingCard();
+		unlocks.ownsLoggingCard = true;
+	}
+	repaintResources();
+  }
+  function buyquarrycard(){
+	if (wood >= 8 && stone >= 3){
+		$("buyquarryButton").remove();
+		wood -=8;
+		stone -= 3;
+		createQuarryCard();
+		unlocks.ownsQuarryCard = true;
+	}
+	repaintResources();
+  }
+  function completeChapter1(){
+	if (wood >= 12 && stone >= 5){
+		wood -= 12;
+		stone -= 5;
+		$("#completeChapter1Button").remove();
+		$("#victoryAudio")[0].play();
+		alert("You have begun the spark of civilization! The FOUR DICEMEN will surely come after you now. Be prepared to weather their tempests, as there is nothing that could possibly fight a god. Or is there? Your new kingdom will now need to grow even further. Perhaps you will rival the heights of the old kingdom?");
+		alert("Also, congratulations. This is the end of the tech demo for this game. Let me know what you think!");
+	}
+	repaintResources();
+  }
   function completeChapter0(){
 	if (wood < 5){
 		return false
@@ -148,7 +192,11 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		wood -= 5;
 		$("#completeChapter0Button").remove();
 		$("#victoryAudio")[0].play();
+		unlocks.ownsDiscoverStoneCard = true;
+		unlocks.ownsDiscoverOrganizationCard = true;
 		alert("Finally, some real shelter! You are so tired of living in a hastily built lean-to. You have a place to think now. The foundation of your new kingdom has been laid. Beware, your activity will not go unnoticed by the FOUR DICEMEN OF THE APOCALYPSE for long...");
+		createDiscoveryStoneCard();
+		createDiscoveryOrganizationCard();
 	}
 	repaintResources();
   }
@@ -185,9 +233,96 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	repaintResources();
 	removeDie();
   }
-  function exhaustCard(cardName){
-	
+  function gatherStone(amount){
+	if (amount > 2){
+	return false;
+	}
+	stone += 2;
+	repaintResources();
+	removeDie();
   }
+  function discoverStone(amount){
+	if (amount != 6){
+		return false;
+	}
+	unlocks.completedDiscoverStone = true;
+	unlocks.ownsGatherStone = true;
+	unlocks.ownsProgressStone = true;
+	createGatherStoneCard();
+	createProgressStoneCard();
+	removeDie();
+	removeCard("discoveryStone");
+  }
+  function discoverOrg(amountIn){
+	let amount = Number(amountIn);
+	if (amount !== 1 && amount !== 2){
+		return false;
+	}
+	else if (secondDieStorage.discoveryOrg == 0 || secondDieStorage.discoveryOrg == null){
+		secondDieStorage.discoveryOrg = amount;
+		removeDie();
+		return false;
+	}
+	else{
+		if ((amount == 1 && secondDieStorage.discoveryOrg == 2) || (secondDieStorage.discoveryOrg == 1 && amount == 2)){
+			//Do the thing
+			unlocks.completedDiscoverOrg = true;
+			unlocks.ownsTeamwork = true;
+			unlocks.ownsPepTalk = true;
+			createPepTalkCard();
+			createTeamworkCard();
+			removeDie();
+			removeCard("discoveryOrg");
+			secondDieStorage.discoveryOrg = 0;
+		}
+	}
+  }
+  function pepTalk(amount){
+		pepTalkUsed = true;
+		let toCreate = Number(amount)+1;
+		removeDie();
+		removeCard("pepTalk");
+		generateDice(toCreate);
+  }
+  function teamwork(amount){
+	if(secondDieStorage.teamwork == 0 || secondDieStorage.teamwork == null){
+		secondDieStorage.teamwork = amount;
+		removeDie();
+		return false;
+	}
+	else{
+	removeDie();
+		let combo = Number(amount) + Number(secondDieStorage.teamwork);
+		secondDieStorage.teamwork = 0;
+		if (combo > 10){
+			combo = 10;
+		}
+		generateDice(combo);
+	}
+  }
+  function progressStone(amount){
+	if (secondDieStorage.progressStone == 0 || secondDieStorage.progressStone == null){
+		secondDieStorage.progressStone = Number(amount);
+		removeDie();
+		return false;
+	}
+	else{
+		let combo = secondDieStorage.progressStone + Number(amount);
+		if (combo >= 8){
+			removeDie();
+			removeCard("progressStone");
+			// unlocks when that matters
+			createChapter1Buttons();
+			return true;
+		}
+		else{
+			secondDieStorage.progressStone = combo;
+			removeDie();
+			return false;
+		}
+	}
+  }
+  
   function startDay(){
 	day += 1;
 	food -= population;
@@ -201,7 +336,14 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			generateDice(0);
 		}
 	}
+	if (pepTalkUsed == true){
+		pepTalkUsed = false;
+		createPepTalkCard();
+	}
 	repaintResources();
+	secondDieStorage.discoveryOrg = 0;
+	secondDieStorage.teamwork = 0;
+	secondDieStorage.progressStone = 0;
 	$("#rollAudio")[0].play();
   }
   function generateDice(value){
@@ -281,7 +423,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		addCard(card);
 	}
 	function createDiscoveryOrganizationCard(){
-		var card = "<div id='discoveryOrg' class='card science'>Discovery: Stone<BR>Communication is key!<Br>Req. Dice: 1,2<br><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img></div>";
+		var card = "<div id='discoveryOrg' class='card science'>Discovery: Organization<BR>Communication is key!<Br>Req. Dice: 1,2<br><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
 	function createProgressStoneCard(){
@@ -309,11 +451,31 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		addCard(card);
 	}
 	function addCard(cardData){
-		if (cardsAssigned < 8){
+		if (cardsAssigned < maxCards){
 			cardsAssigned++;
 			let cardstr = "cardArea" + cardsAssigned + "";
 			document.getElementById(cardstr).innerHTML += cardData;
 		}
+	}
+	function exhaustCard(cardName){
+	
+	}
+	function removeCard(cardName){
+		let x = document.getElementById(cardName);
+		let y = x.parentNode;
+		let z = y.id;
+		y.innerHTML = "";
+		shiftCards(z);
+	}
+	function shiftCards(which){
+		let currentDivNum = Number(which.substring(which.length - 1));
+		for (let i = currentDivNum; i < maxCards; i++){
+			let j = i+1;
+			let tempName = "cardArea" + j + "";
+			let temp = document.getElementById(tempName).innerHTML;
+			document.getElementById("cardArea" + i + "").innerHTML = temp;
+		}
+		document.getElementById("cardArea8").innerHTML = "";
 	}
 	function repaintResources(){
 		document.getElementById("Day").innerHTML = "Day " + day + "";
@@ -324,6 +486,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			document.getElementById('Wheat').innerHTML = food + " food";
 		}
 		document.getElementById('Wood').innerHTML = wood + " wood";
+		document.getElementById('Stone').innerHTML = stone + " stone";
 	}
   </script>
 </html>
