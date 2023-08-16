@@ -21,9 +21,14 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	<link href="./styles/style.css" rel="stylesheet" type="text/css" />
   <body>
 	<div id="Day">Day 0</div><br>
-	<div id="Wheat">0 food</div><br>
-	<div id="Wood">0 wood</div><br>
-	<div id="Stone">0 stone</div><br>
+	<table class="resourcesArea">
+		<tr>
+			<td class="resourcesArea food"><div id="Wheat">0 food</div></td>
+			<td class="resourcesArea wood"><div id="Wood">0 wood</div></td>
+			<td class="resourcesArea stone"><div id="Stone">0 stone</div></td>
+		</tr>
+	</table><br>
+	<div id = 'messageArea'></div>
 	<div id = 'diceArea'><!--<img id='1' src='./onedie.png' draggable="true" ondragstart="drag(event)" dieVal='1'></img>--></div>
 	<div id = 'cardArea'>
 		<table>
@@ -57,8 +62,12 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   <script>
   var day = 0;
   var food = 4;
+  var foodStorage = 20;
   var wood = 0;
+  var woodStorage = 15;
   var stone = 0;
+  var stoneStorage = 10;
+  var wrath = false;
   var population = 2;
   var cardsAssigned = 0;
   var maxCards = 8;//4;
@@ -66,7 +75,9 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var gameData = {};
   var unlocks = {};
   var secondDieStorage = {};
+  var usedCards = [];
   var pepTalkUsed = false;
+  var wrathValue = 0;
   
   window.onload = function(e){
 	gameData.showIntro = true;
@@ -180,7 +191,9 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		$("#completeChapter1Button").remove();
 		$("#victoryAudio")[0].play();
 		alert("You have begun the spark of civilization! The FOUR DICEMEN will surely come after you now. Be prepared to weather their tempests, as there is nothing that could possibly fight a god. Or is there? Your new kingdom will now need to grow even further. Perhaps you will rival the heights of the old kingdom?");
-		alert("Also, congratulations. This is the end of the tech demo for this game. Let me know what you think!");
+		alert("Also, fair warning, this next bit is part of the now-incomplete next chapter.");
+		population = 3;
+		wrath = true;
 	}
 	repaintResources();
   }
@@ -223,7 +236,9 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   function farmWheat(amount){
 	food += amount;
 	repaintResources();
+	usedCards.push("farming");
 	removeDie();
+	removeCard("farm");
   }
   function gatherSticks(amount){
 	if (amount < 4){
@@ -232,6 +247,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	wood += amount - 3;
 	repaintResources();
 	removeDie();
+	usedCards.push("gatherSticks");
+	removeCard("sticks");
   }
   function gatherStone(amount){
 	if (amount > 2){
@@ -240,6 +257,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	stone += 2;
 	repaintResources();
 	removeDie();
+	usedCards.push("gatherStone");
+	removeCard("gatherStone");
   }
   function discoverStone(amount){
 	if (amount != 6){
@@ -255,16 +274,13 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   }
   function discoverOrg(amountIn){
 	let amount = Number(amountIn);
-	if (amount !== 1 && amount !== 2){
-		return false;
-	}
-	else if (secondDieStorage.discoveryOrg == 0 || secondDieStorage.discoveryOrg == null){
+	if (secondDieStorage.discoveryOrg == 0 || secondDieStorage.discoveryOrg == null){
 		secondDieStorage.discoveryOrg = amount;
 		removeDie();
 		return false;
 	}
 	else{
-		if ((amount == 1 && secondDieStorage.discoveryOrg == 2) || (secondDieStorage.discoveryOrg == 1 && amount == 2)){
+		if (amount + secondDieStorage.discoveryOrg == 7){
 			//Do the thing
 			unlocks.completedDiscoverOrg = true;
 			unlocks.ownsTeamwork = true;
@@ -278,7 +294,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	}
   }
   function pepTalk(amount){
-		pepTalkUsed = true;
+		usedCards.push("pepTalk");
 		let toCreate = Number(amount)+1;
 		removeDie();
 		removeCard("pepTalk");
@@ -298,6 +314,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			combo = 10;
 		}
 		generateDice(combo);
+		usedCards.push("teamwork");
+		removeCard("teamwork");
 	}
   }
   function progressStone(amount){
@@ -329,6 +347,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	wood += amount - 1;
 	repaintResources();
 	removeDie();
+	removeCard("logging");
+	usedCards.push("logging");
   }
   function quarryStone(amount){
 	if (amount > 3){
@@ -337,6 +357,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	stone += amount + 1;
 	repaintResources();
 	removeDie();
+	removeCard("quarry");
+	usedCards.push("quarry");
   }
   
   function startDay(){
@@ -352,9 +374,15 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			generateDice(0);
 		}
 	}
+	rebuildCards();
 	if (pepTalkUsed == true){
 		pepTalkUsed = false;
 		createPepTalkCard();
+	}
+	if (wrath == true){
+		computeWrathStatus();
+		decideWrath();
+		doWrath();
 	}
 	repaintResources();
 	secondDieStorage.discoveryOrg = 0;
@@ -422,8 +450,33 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 
 		return text;
 	}
+	function rebuildCards(){
+	
+		if (usedCards.includes("farming")){
+			createFarmingCard();
+		}
+		if (usedCards.includes("gatherSticks")){
+			createSticksCard();
+		}
+		if (usedCards.includes("logging")){
+			createLoggingCard();
+		}
+		if (usedCards.includes("gatherStone")){
+			createGatherStoneCard();
+		}
+		if (usedCards.includes("quarry")){
+			createQuarryCard();
+		}
+		if (usedCards.includes("teamwork")){
+			createTeamworkCard();
+		}
+		if (usedCards.includes("pepTalk")){
+			createPepTalkCard();
+		}
+		usedCards = [];
+	}
 	function createScroungingCard(){
-		var card = "<div id='scrounge' class='card food'>Scrounge<BR>Gain 2 food.<br><img src='./images/emptydie.png' ondrop='drop(event, scroungeWheat)' ondragover='allowDrop(event)'></img></div>";
+		var card = "<div id='scrounge' class='card food'>Scrounge<BR>Gain 2 food.<br>Unlimited use.<br><img src='./images/emptydie.png' ondrop='drop(event, scroungeWheat)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
 	function createFarmingCard(){
@@ -439,11 +492,11 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		addCard(card);
 	}
 	function createDiscoveryOrganizationCard(){
-		var card = "<div id='discoveryOrg' class='card science'>Discovery: Organization<BR>Communication is key!<Br>Req. Dice: 1,2<br><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img></div>";
+		var card = "<div id='discoveryOrg' class='card science'>Discovery: Organization<BR>Communication is key!<Br>Total: =7<br><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
 	function createProgressStoneCard(){
-		var card = "<div id='progressStone' class='card science'>Progress: Stone<BR>Stone for other applications.<BR>Total: 8<br><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img></div>";
+		var card = "<div id='progressStone' class='card science'>Progress: Stone<BR>Stone for other applications.<BR>Total: 8+<br><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img></div>";
 		addCard(card);
 	}
 	function createGatherStoneCard(){
@@ -504,6 +557,10 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		}
 		document.getElementById('Wood').innerHTML = wood + " wood";
 		document.getElementById('Stone').innerHTML = stone + " stone";
+	}
+	function computeWrath(){
+		wrathValue = Math.max(0, food - foodStorage) + Math.max(0, wood - woodStorage) + Math.max(0, stone - stoneStorage);
+		
 	}
   </script>
 </html>

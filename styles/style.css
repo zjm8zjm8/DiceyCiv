@@ -1,3 +1,16 @@
+.resourcesArea table{
+		border-collapse: collapse;
+		border: 1px solid black;
+}
+
+.resourcesArea td{
+	border: 1px solid black;
+	padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
 .card {
 	width: 150px;
 	height: 150px;
@@ -15,10 +28,11 @@
 
 .food{
 	background-color: #dddd00;
+	background: #dddd00;
 }
 
 .wood{
-	background-color: #128822;
+	background-color: #52C862;
 }
 
 .science{
