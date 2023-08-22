@@ -20,43 +20,53 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 "></script>
 	<link href="./styles/style.css" rel="stylesheet" type="text/css" />
   <body>
-	<div id="Day">Day 0</div><br>
-	<table class="resourcesArea">
-		<tr>
-			<td class="resourcesArea food"><div id="Wheat">0 food</div></td>
-			<td class="resourcesArea wood"><div id="Wood">0 wood</div></td>
-			<td class="resourcesArea stone"><div id="Stone">0 stone</div></td>
-		</tr>
-	</table><br>
-	<div id = 'messageArea'></div>
-	<div id = 'diceArea'><!--<img id='1' src='./onedie.png' draggable="true" ondragstart="drag(event)" dieVal='1'></img>--></div>
-	<div id = 'cardArea'>
-		<table>
-			<tr>
-				<td id="cardArea1">
-				</td>
-				<td id="cardArea2">
-				</td>
-				<td id="cardArea3">
-				</td>
-				<td id="cardArea4">
-				</td>
-			</tr>
-			<tr>
-				<td id="cardArea5">
-				</td>
-				<td id="cardArea6">
-				</td>
-				<td id="cardArea7">
-				</td>
-				<td id="cardArea8">
-				</td>
-			</tr>
-		</table>
+	<div id="tabs" class="tab">
+		<button class="tablinks" id="defaultOpenTab" onclick="openTab(event, 'home')">Home</button>
+		<button class="tablinks" onclick="openTab(event, 'org')">Organize</button>
+		<br>
 	</div>
-	<div id='buttonArea'><button onclick="startDay()">Start the Day</button></div>
-	<audio autoplay='false' controls='false' src='./sounds/roll.wav' id='rollAudio' hidden></audio>
-	<audio autoplay='false' controls='false' src='./sounds/victory.wav' id='victoryAudio' hidden></audio>
+	<div id="home" class="tabcontent">
+		<div id="Day">Day 0</div><br>
+		<table class="resourcesArea">
+			<tr>
+				<td class="resourcesArea food"><div id="Wheat">0 food</div></td>
+				<td class="resourcesArea wood"><div id="Wood">0 wood</div></td>
+				<td class="resourcesArea stone"><div id="Stone">0 stone</div></td>
+			</tr>
+		</table><br>
+		<div id = 'messageArea'></div>
+		<div id = 'diceArea'><!--<img id='1' src='./onedie.png' draggable="true" ondragstart="drag(event)" dieVal='1'></img>--></div>
+		<div id = 'cardArea'>
+			<table>
+				<tr>
+					<td id="cardArea1">
+					</td>
+					<td id="cardArea2">
+					</td>
+					<td id="cardArea3">
+					</td>
+					<td id="cardArea4">
+					</td>
+				</tr>
+				<tr>
+					<td id="cardArea5">
+					</td>
+					<td id="cardArea6">
+					</td>
+					<td id="cardArea7">
+					</td>
+					<td id="cardArea8">
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id='buttonArea'><button onclick="startDay()">Start the Day</button></div>
+		<audio autoplay='false' controls='false' src='./sounds/roll.wav' id='rollAudio' hidden></audio>
+		<audio autoplay='false' controls='false' src='./sounds/victory.wav' id='victoryAudio' hidden></audio>
+	</div>
+	<div id="org" class="tabcontent">
+		This is the organization area! You can only see this if you hit the organization area.
+	</div>
   </body>
   
   <script>
@@ -79,19 +89,51 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var pepTalkUsed = false;
   var wrathValue = 0;
   
+  function openTab(evt, tabName) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the button that opened the tab
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+	function hideTabs(){
+		document.getElementById("tabs").style.display = "none";
+	}
+	function showTabs(){
+		document.getElementById("tabs").style.display = "block";
+	}
   window.onload = function(e){
 	gameData.showIntro = true;
 	loadGame();
 	console.log(gameData.showIntro);
-	if (gameData.showIntro == true){
-		showStoryIntro();
-	}
+	
 	createScroungingCard();
 	createChapter0Buttons();
 	repaintResources();
+	document.getElementById("defaultOpenTab").click();
+	//hideTabs(); //Removed for testing
+	if (gameData.showIntro == true){
+		showStoryIntro();
+	}
 	gameData.showIntro = false;
+	startDay();
+	document.getElementById('messageArea').innerHTML = "Click and drag dice onto cards to use their effects.";
   }
   
+ 
   function saveGame(){
 	Cookies.set("gameData", JSON.stringify(gameData));
   }
@@ -137,6 +179,21 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	buyfarmcard();
 	buystickcard();
 	completeChapter0();
+  }
+  function skipChapter1(){
+	skipChapter0();
+	day = 30;
+	food = 25;
+	wood = 40;
+	stone = 30;
+	discoverStone(6);
+	discoverOrg(1);
+	discoverOrg(6);
+	progressStone(6);
+	progressStone(6);
+	buylogcard();
+	buyquarrycard();
+	completeChapter1();
   }
   
   function buyfarmcard(){
@@ -223,6 +280,9 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   
   function removeDie()
   {
+	if (currentDie == null){
+		return;
+	}
 	if (currentDie.length > 0)
 		document.getElementById(currentDie).remove();
 	currentDie = "";
@@ -290,6 +350,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			createTeamworkCard();
 			removeDie();
 			secondDieStorage.discoveryOrg = 0;
+			showTabs();
 		}
 	}
   }
@@ -364,6 +425,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   function startDay(){
 	day += 1;
 	food -= population;
+	document.getElementById('messageArea').innerHTML = ""; // Wipe the message area.
 	document.getElementById('diceArea').innerHTML = ""; // Clear the dice.
 	if (food < 0){
 		generateDice(0)
@@ -380,9 +442,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		createPepTalkCard();
 	}
 	if (wrath == true){
-		computeWrathStatus();
-		decideWrath();
-		doWrath();
+		computeWrath();
 	}
 	repaintResources();
 	secondDieStorage.discoveryOrg = 0;
@@ -559,8 +619,46 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		document.getElementById('Stone').innerHTML = stone + " stone";
 	}
 	function computeWrath(){
-		wrathValue = Math.max(0, food - foodStorage) + Math.max(0, wood - woodStorage) + Math.max(0, stone - stoneStorage);
-		
+		let wrathValue = Math.max(0, food - foodStorage) + Math.max(0, wood - woodStorage) + Math.max(0, stone - stoneStorage);
+		let foodDamage = 0;
+		let woodDamage = 0;
+		let stoneDamage = 0;
+		if (wrathValue < Math.floor(Math.random() * 100)){ //Wrath strikes!
+			if (food > foodStorage){
+				foodDamage = Math.ceil((food - foodStorage)/4);
+			}
+			if (wood > woodStorage){
+				woodDamage = Math.ceil((wood - woodStorage)/5);
+			}
+			if (stone > stoneStorage){
+				stoneDamage = Math.ceil((stone - stoneStorage)/10);
+			}
+			food -= foodDamage;
+			wood -= woodDamage;
+			stone -= stoneDamage;
+			let wrathText = "<font color=red>Golod strikes, and you have lost ";
+			if (foodDamage > 0)
+			{
+				wrathText = wrathText + foodDamage + " food";
+			}
+			if (woodDamage > 0){
+				if (foodDamage > 0 && stoneDamage > 0){
+					wrathText = wrathText + ", ";
+				}
+				if (foodDamage > 0 && stoneDamage < 1){
+					wrathText = wrathText + " and ";
+				}
+				wrathText = wrathText + woodDamage + " wood";
+			}
+			if (stoneDamage > 0){
+				if (foodDamage > 0 || woodDamage > 0){
+					wrathText = wrathText + " and ";
+				}
+				wrathText = wrathText + stoneDamage + " stone";
+			}
+			wrathText = wrathText + ".</font>"
+			document.getElementById("messageArea").innerHTML = wrathText;
+		}
 	}
   </script>
 </html>
