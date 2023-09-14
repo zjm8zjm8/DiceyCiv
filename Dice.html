@@ -22,7 +22,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   <body>
 	<div id="tabs" class="tab">
 		<button class="tablinks" id="defaultOpenTab" onclick="openTab(event, 'home')">Home</button>
-		<button class="tablinks" onclick="openTab(event, 'org')">Organize</button>
+		<button class="tablinks" id="orgTabButton" onclick="openTab(event, 'org')">Organize</button>
 		<br>
 	</div>
 	<div id="home" class="tabcontent">
@@ -65,7 +65,35 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		<audio autoplay='false' controls='false' src='./sounds/victory.wav' id='victoryAudio' hidden></audio>
 	</div>
 	<div id="org" class="tabcontent">
-		This is the organization area! You can only see this if you hit the organization area.
+		Proper organization leads to success! You can change your cards here.<br> 
+		Click on buttons in the list to put them into the next available slot. Click on items in the slots to remove them.<br>
+		Beware: Once you reassign the cards, you will not be able to make changes for the next 10 days!<br>
+		<div id = 'fakeCardArea'>
+			<table>
+				<tr>
+					<td id="fakeCardArea1">
+					</td>
+					<td id="fakeCardArea2">
+					</td>
+					<td id="fakeCardArea3">
+					</td>
+					<td id="fakeCardArea4">
+					</td>
+				</tr>
+				<tr>
+					<td id="fakeCardArea5">
+					</td>
+					<td id="fakeCardArea6">
+					</td>
+					<td id="fakeCardArea7">
+					</td>
+					<td id="fakeCardArea8">
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id = 'fakeButtonArea'>
+		</div>
 	</div>
   </body>
   
@@ -82,17 +110,25 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var cardsAssigned = 0;
   var maxCards = 8;//4;
   var currentDie;
-  var gameData = {};
   var unlocks = {};
+  var showIntro = true;
   var secondDieStorage = {};
-  var usedCards = [];
-  var pepTalkUsed = false;
   var wrathValue = 0;
+  var organizeCooldown = 0;
+  var cardSlots = ["", "", "", "", "", "", "", ""];
+  var orgCardSlots = ["", "", "", "", "", "", "", ""];
+  var cards = [];
+  var completedScience = [];
   
   function openTab(evt, tabName) {
   // Declare all variables
   var i, tabcontent, tablinks;
-
+	if (tabName == "org"){
+		if (organizeCooldown > 0){
+			tabName = "home";
+		}
+		buildOrgPage();
+	}
   // Get all elements with class="tabcontent" and hide them
   tabcontent = document.getElementsByClassName("tabcontent");
   for (i = 0; i < tabcontent.length; i++) {
@@ -116,33 +152,17 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		document.getElementById("tabs").style.display = "block";
 	}
   window.onload = function(e){
-	gameData.showIntro = true;
-	loadGame();
-	console.log(gameData.showIntro);
-	
-	createScroungingCard();
+	//loadGame();
+	addCardToSlots("scrounge");
 	createChapter0Buttons();
 	repaintResources();
 	document.getElementById("defaultOpenTab").click();
 	//hideTabs(); //Removed for testing
-	if (gameData.showIntro == true){
+	if (showIntro == true){
 		showStoryIntro();
 	}
-	gameData.showIntro = false;
 	startDay();
 	document.getElementById('messageArea').innerHTML = "Click and drag dice onto cards to use their effects.";
-  }
-  
- 
-  function saveGame(){
-	Cookies.set("gameData", JSON.stringify(gameData));
-  }
-  
-  function loadGame(){
-	let x = Cookies.get("gameData");
-	if (typeof x !== 'undefined'){
-		gameData = JSON.parse(x);
-	}
   }
   
   function showStoryIntro(){
@@ -201,11 +221,11 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	return false
 	}
 	else{
-		createFarmingCard();
+		addCardToSlots("farming");
 		food -= 5;
 		$("#buyfarmButton").remove();
 	}
-	unlocks.ownsFarmingCard = true;
+	addCardToCardsList("farming");
 	repaintResources();
   }
   
@@ -213,11 +233,11 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	if (food < 8){
 		return false}
 		else{
-		createSticksCard();
+		addCardToSlots("gatherSticks");
 		food -= 8;
 		$("#buystickButton").remove();
 		}
-	unlocks.ownsStickCard = true;
+	addCardToCardsList("gatherSticks");
 	repaintResources();
   }
   
@@ -226,7 +246,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		$("#buylogButton").remove();
 		wood -= 5;
 		stone -= 5;
-		createLoggingCard();
+		addCardToSlots("logging");
+		addCardToCardsList("logging");
 		unlocks.ownsLoggingCard = true;
 	}
 	repaintResources();
@@ -236,7 +257,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		$("#buyquarryButton").remove();
 		wood -=8;
 		stone -= 3;
-		createQuarryCard();
+		addCardToSlots("quarry");
+		addCardToCardsList("quarry");
 		unlocks.ownsQuarryCard = true;
 	}
 	repaintResources();
@@ -249,6 +271,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		$("#victoryAudio")[0].play();
 		alert("You have begun the spark of civilization! The FOUR DICEMEN will surely come after you now. Be prepared to weather their tempests, as there is nothing that could possibly fight a god. Or is there? Your new kingdom will now need to grow even further. Perhaps you will rival the heights of the old kingdom?");
 		alert("Also, fair warning, this next bit is part of the now-incomplete next chapter.");
+		alert("You now have more than 8 cards. Use the organization tab to select which cards you would like to use.");
 		population = 3;
 		wrath = true;
 	}
@@ -264,9 +287,11 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		$("#victoryAudio")[0].play();
 		unlocks.ownsDiscoverStoneCard = true;
 		unlocks.ownsDiscoverOrganizationCard = true;
+		addCardToCardsList("discoveryStone");
+		addCardToCardsList("discoveryOrg");
+		addCardToSlots("discoveryStone");
+		addCardToSlots("discoveryOrg");
 		alert("Finally, some real shelter! You are so tired of living in a hastily built lean-to. You have a place to think now. The foundation of your new kingdom has been laid. Beware, your activity will not go unnoticed by the FOUR DICEMEN OF THE APOCALYPSE for long...");
-		createDiscoveryStoneCard();
-		createDiscoveryOrganizationCard();
 	}
 	repaintResources();
   }
@@ -296,7 +321,6 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   function farmWheat(amount){
 	food += amount;
 	repaintResources();
-	usedCards.push("farming");
 	removeDie();
 	removeCard("farm");
   }
@@ -307,7 +331,6 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	wood += amount - 3;
 	repaintResources();
 	removeDie();
-	usedCards.push("gatherSticks");
 	removeCard("sticks");
   }
   function gatherStone(amount){
@@ -317,7 +340,6 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	stone += 2;
 	repaintResources();
 	removeDie();
-	usedCards.push("gatherStone");
 	removeCard("gatherStone");
   }
   function discoverStone(amount){
@@ -328,8 +350,12 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	unlocks.ownsGatherStone = true;
 	unlocks.ownsProgressStone = true;
 	removeCard("discoveryStone");
-	createGatherStoneCard();
-	createProgressStoneCard();
+	removeCardFromSlots("discoveryStone");
+	completedScience.push("discoveryStone");
+	addCardToCardsList("progressStone");
+	addCardToSlots("progressStone");
+	addCardToCardsList("gatherStone");
+	addCardToSlots("gatherStone");
 	removeDie();
   }
   function discoverOrg(amountIn){
@@ -346,8 +372,12 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			unlocks.ownsTeamwork = true;
 			unlocks.ownsPepTalk = true;
 			removeCard("discoveryOrg");
-			createPepTalkCard();
-			createTeamworkCard();
+			removeCardFromSlots("discoveryOrg");
+			completedScience.push("discoveryOrg");
+			addCardToCardsList("teamwork");
+			addCardToSlots("teamwork");
+			addCardToCardsList("pepTalk");
+			addCardToSlots("pepTalk");
 			removeDie();
 			secondDieStorage.discoveryOrg = 0;
 			showTabs();
@@ -355,7 +385,6 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	}
   }
   function pepTalk(amount){
-		usedCards.push("pepTalk");
 		let toCreate = Number(amount)+1;
 		removeDie();
 		removeCard("pepTalk");
@@ -375,7 +404,6 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			combo = 10;
 		}
 		generateDice(combo);
-		usedCards.push("teamwork");
 		removeCard("teamwork");
 	}
   }
@@ -390,6 +418,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		if (combo >= 8){
 			removeDie();
 			removeCard("progressStone");
+			removeCardFromSlots("progressStone");
+			completedScience.push("progressStone");
 			// unlocks when that matters
 			createChapter1Buttons();
 			return true;
@@ -409,7 +439,6 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	repaintResources();
 	removeDie();
 	removeCard("logging");
-	usedCards.push("logging");
   }
   function quarryStone(amount){
 	if (amount > 3){
@@ -419,7 +448,6 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	repaintResources();
 	removeDie();
 	removeCard("quarry");
-	usedCards.push("quarry");
   }
   
   function startDay(){
@@ -437,10 +465,6 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		}
 	}
 	rebuildCards();
-	if (pepTalkUsed == true){
-		pepTalkUsed = false;
-		createPepTalkCard();
-	}
 	if (wrath == true){
 		computeWrath();
 	}
@@ -448,7 +472,24 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	secondDieStorage.discoveryOrg = 0;
 	secondDieStorage.teamwork = 0;
 	secondDieStorage.progressStone = 0;
-	$("#rollAudio")[0].play();
+	if (organizeCooldown > 0){
+		organizeCooldown--;
+		if (organizeCooldown == 0){
+			document.getElementById("orgTabButton").innerHTML = "Organize";
+		}
+		else{
+			document.getElementById("orgTabButton").innerHTML = organizeCooldown;
+		}
+	}
+		// Refactor causes this to fail on the first day. Try catch removes the error.
+	var resp = $("#rollAudio")[0].play();
+	if (resp !== undefined){
+		resp.then(_ => {
+			// autoplay starts!
+		}).catch(error => {
+			// show error
+		});
+	}
   }
   function generateDice(value){
 	var dieVal = 0;
@@ -511,91 +552,118 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		return text;
 	}
 	function rebuildCards(){
-	
-		if (usedCards.includes("farming")){
-			createFarmingCard();
+	console.log(cardSlots);
+		removeAllCards();
+		for (let i = 0; i < 8; i++){
+			if (cardSlots[i] == "scrounge"){
+				addCard(getScroungingCardData(), i);
+			}
+			if (cardSlots[i] == "farming"){
+				addCard(getFarmingCardData(), i);
+			}
+			if (cardSlots[i] == "gatherSticks"){
+				addCard(getSticksCardData(), i);
+			}
+			if (cardSlots[i] == "logging"){
+				addCard(getLoggingCardData(), i);
+			}
+			if (cardSlots[i] == "gatherStone"){
+				addCard(getGatherStoneCardData(), i);
+			}
+			if (cardSlots[i] == "quarry"){
+				addCard(getQuarryCardData(), i);
+			}
+			if (cardSlots[i] == "teamwork"){
+				addCard(getTeamworkCardData(), i);
+			}
+			if (cardSlots[i] == "pepTalk"){
+				addCard(getPepTalkCardData(), i);
+			}
+			if (cardSlots[i] == "discoveryStone"){
+				addCard(getDiscoveryStoneCardData(), i);
+			}
+			if (cardSlots[i] == "discoveryOrg"){
+				addCard(getDiscoveryOrganizationCardData(), i);
+			}
+			if (cardSlots[i] == "progressStone"){
+				addCard(getProgressStoneCardData(), i);
+			}
 		}
-		if (usedCards.includes("gatherSticks")){
-			createSticksCard();
+	}
+	function getScroungingCardData(){
+		return "<div id='scrounge' class='card food'>Scrounge<BR>Gain 2 food.<br>Unlimited use.<br><img src='./images/emptydie.png' ondrop='drop(event, scroungeWheat)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function getFarmingCardData(){
+		return "<div id='farm' class='card food'>Farm Wheat<BR>Gain X food.<br><img src='./images/emptydie.png' ondrop='drop(event, farmWheat)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function getSticksCardData(){
+		return "<div id='sticks' class='card wood'>Gather Sticks<BR>Gain X-3 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, gatherSticks)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function getDiscoveryStoneCardData(){
+		return "<div id='discoveryStone' class='card science'>Discovery: Stone<BR>Find a way to work with stone.<Br>Req. Die: 6<br><img src='./images/emptydie.png' ondrop='drop(event, discoverStone)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function getDiscoveryOrganizationCardData(){
+		return "<div id='discoveryOrg' class='card science'>Discovery: Organization<BR>Communication is key!<Br>Total: =7<br><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function getProgressStoneCardData(){
+		return "<div id='progressStone' class='card science'>Progress: Stone<BR>Stone for other applications.<BR>Total: 8+<br><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function getGatherStoneCardData(){
+		return "<div id='gatherStone' class='card stone'>Gather Stone<BR>Gain 2 stone.<BR>Max Die: 2<br><img src='./images/emptydie.png' ondrop='drop(event, gatherStone)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function getTeamworkCardData(){
+		return "<div id='teamwork' class='card organization'>Teamwork<BR>Combine 2 dice.<BR><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function getPepTalkCardData(){
+		return "<div id='pepTalk' class='card organization'>Pep Talk<BR>Add 1 to die value.<br><img src='./images/emptydie.png' ondrop='drop(event, pepTalk)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function getLoggingCardData(){
+		return "<div id='logging' class='card wood'>Logging<BR>Gain X-1 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, logging)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function getQuarryCardData(){
+		return "<div id='quarry' class='card stone'>Quarry Stone<BR>Gain X+1 stone.<br>Max Die: 3<br><img src='./images/emptydie.png' ondrop='drop(event, quarryStone)' ondragover='allowDrop(event)'></img></div>";
+	}
+	function addCardToSlots(cardName){
+		for (let i = 0; i < 8; i++){
+			if (cardSlots[i] == ""){
+				cardSlots[i] = cardName;
+				return;
+			}
 		}
-		if (usedCards.includes("logging")){
-			createLoggingCard();
-		}
-		if (usedCards.includes("gatherStone")){
-			createGatherStoneCard();
-		}
-		if (usedCards.includes("quarry")){
-			createQuarryCard();
-		}
-		if (usedCards.includes("teamwork")){
-			createTeamworkCard();
-		}
-		if (usedCards.includes("pepTalk")){
-			createPepTalkCard();
-		}
-		usedCards = [];
 	}
-	function createScroungingCard(){
-		var card = "<div id='scrounge' class='card food'>Scrounge<BR>Gain 2 food.<br>Unlimited use.<br><img src='./images/emptydie.png' ondrop='drop(event, scroungeWheat)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
+	function addCardToCardsList(cardName){
+		cards.push(cardName);
 	}
-	function createFarmingCard(){
-		var card = "<div id='farm' class='card food'>Farm Wheat<BR>Gain X food.<br><img src='./images/emptydie.png' ondrop='drop(event, farmWheat)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
-	}
-	function createSticksCard(){
-		var card = "<div id='sticks' class='card wood'>Gather Sticks<BR>Gain X-3 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, gatherSticks)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
-	}
-	function createDiscoveryStoneCard(){
-		var card = "<div id='discoveryStone' class='card science'>Discovery: Stone<BR>Find a way to work with stone.<Br>Req. Die: 6<br><img src='./images/emptydie.png' ondrop='drop(event, discoverStone)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
-	}
-	function createDiscoveryOrganizationCard(){
-		var card = "<div id='discoveryOrg' class='card science'>Discovery: Organization<BR>Communication is key!<Br>Total: =7<br><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
-	}
-	function createProgressStoneCard(){
-		var card = "<div id='progressStone' class='card science'>Progress: Stone<BR>Stone for other applications.<BR>Total: 8+<br><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
-	}
-	function createGatherStoneCard(){
-		var card = "<div id='gatherStone' class='card stone'>Gather Stone<BR>Gain 2 stone.<BR>Max Die: 2<br><img src='./images/emptydie.png' ondrop='drop(event, gatherStone)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
-	}
-	function createTeamworkCard(){
-		var card = "<div id='teamwork' class='card organization'>Teamwork<BR>Combine 2 dice.<BR><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
-	}
-	function createPepTalkCard(){
-		var card = "<div id='pepTalk' class='card organization'>Pep Talk<BR>Add 1 to die value.<br><img src='./images/emptydie.png' ondrop='drop(event, pepTalk)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
-	}
-	function createLoggingCard(){
-		var card = "<div id='logging' class='card wood'>Logging<BR>Gain X-1 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, logging)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
-	}
-	function createQuarryCard(){
-		var card = "<div id='quarry' class='card stone'>Quarry Stone<BR>Gain X+1 stone.<br>Max Die: 3<br><img src='./images/emptydie.png' ondrop='drop(event, quarryStone)' ondragover='allowDrop(event)'></img></div>";
-		addCard(card);
-	}
-	function addCard(cardData){
-		if (cardsAssigned < maxCards){
-			cardsAssigned++;
-			let cardstr = "cardArea" + cardsAssigned + "";
+	function addCard(cardData, position){
+		if (position >= 0 && position <= 7){
+			let cardstr = "cardArea" + (position+1) + "";
 			document.getElementById(cardstr).innerHTML += cardData;
 		}
 	}
-	function exhaustCard(cardName){
-	
+	function removeCardFromSlots(cardName){
+		for (let i = 0; i < 8; i++){
+			if (cardSlots[i] == cardName){
+				cardSlots[i] = "";
+			}
+		}
 	}
 	function removeCard(cardName){
 		cardsAssigned--;
 		let x = document.getElementById(cardName);
 		let y = x.parentNode;
 		let z = y.id;
-		y.innerHTML = "";
-		shiftCards(z);
+		y.innerHTML = "<div class='card'></div>";
+		//shiftCards(z);
+	}
+	function removeAllCards(){
+		document.getElementById("cardArea1").innerHTML = "";
+		document.getElementById("cardArea2").innerHTML = "";
+		document.getElementById("cardArea3").innerHTML = "";
+		document.getElementById("cardArea4").innerHTML = "";
+		document.getElementById("cardArea5").innerHTML = "";
+		document.getElementById("cardArea6").innerHTML = "";
+		document.getElementById("cardArea7").innerHTML = "";
+		document.getElementById("cardArea8").innerHTML = "";
 	}
 	function shiftCards(which){
 		let currentDivNum = Number(which.substring(which.length - 1));
@@ -659,6 +727,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			wrathText = wrathText + ".</font>"
 			document.getElementById("messageArea").innerHTML = wrathText;
 		}
+	}
+	function buildOrgPage(){
 	}
   </script>
 </html>
