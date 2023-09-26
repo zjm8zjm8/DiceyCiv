@@ -46,7 +46,14 @@
 	text-align: center;
 	position: relative;
 }
-
+.orgCard {
+	width: 75px;
+	height: 75px;
+	border: 1px solid;
+	border-radius: 3px;
+	text-align: center;
+	position: relative;
+}
 .card img{
 	display: inline;
 	margin-left: auto;
