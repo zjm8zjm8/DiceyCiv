@@ -400,8 +400,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	removeDie();
 		let combo = Number(amount) + Number(secondDieStorage.teamwork);
 		secondDieStorage.teamwork = 0;
-		if (combo > 10){
-			combo = 10;
+		if (combo > 12){
+			combo = 12;
 		}
 		generateDice(combo);
 		removeCard("teamwork");
@@ -534,6 +534,10 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				return "./images/ninedie.png";
 			case 10:
 				return "./images/tendie.png";
+			case 11:
+				return "./images/elevendie.png";
+			case 12:
+				return "./images/twelvedie.png";
 			default:
 				return "./images/emptydie.png";
 		

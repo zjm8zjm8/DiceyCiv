@@ -1,1 +1,3 @@
-Making a dice-based civilization type game in Javascript. This is a prototype for nailing down some concepts and getting things going. I have quite a few versions of this floating around so this repo can become the definitive version.
+Kingdom of Dice is a dice-based civilization game inspired by Kitten's Game and Dicey Dungeons.
+
+It is still in very early development, but an introductory part of the game is currently playable. Just download the repo and open the dice.html page.
