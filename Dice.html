@@ -20,7 +20,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 "></script>
 	<link href="./styles/style.css" rel="stylesheet" type="text/css" />
   <body>
-	<div id="tabs" class="tab">
+	<div id="tabs" class="tab" style="display:none;">
 		<button class="tablinks" id="defaultOpenTab" onclick="openTab(event, 'home')">Home</button>
 		<button class="tablinks" id="orgTabButton" onclick="openTab(event, 'org')">Organize</button>
 		<br>
@@ -68,6 +68,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		Proper organization leads to success! You can change your cards here.<br> 
 		Click on buttons in the list to put them into the next available slot. Click on items in the slots to remove them.<br>
 		Beware: Once you reassign the cards, you will not be able to make changes for the next 10 days!<br>
+		<button onclick="commitOrg()">Commit Card Changes</button><br>
 		<div id = 'orgCardArea'>
 			<table>
 				<tr>
@@ -117,7 +118,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var organizeCooldown = 0;
   var cardSlots = ["", "", "", "", "", "", "", ""];
   var orgCardSlots = ["", "", "", "", "", "", "", ""];
-  var cards = [];
+  var cards = ["scrounge"];
   var completedScience = [];
   
   function openTab(evt, tabName) {
@@ -157,7 +158,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	createChapter0Buttons();
 	repaintResources();
 	document.getElementById("defaultOpenTab").click();
-	//hideTabs(); //Removed for testing
+	hideTabs(); //Removed for testing
 	if (showIntro == true){
 		showStoryIntro();
 	}
@@ -192,6 +193,14 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	"<button id=buyquarryButton onclick='buyquarrycard()'>Quarry Stone (requires 8 wood, 3 stone)</button>" +
 	"<button id=completeChapter1Button onclick='completeChapter1()'>Build A Grand Bonfire (requires 12 wood, 5 stone)</button>";
   }
+  function createChapter2Buttons(){
+	document.getElementById("buttonArea").innerHTML += "<button id=buyGranaryButton onclick='buyGranary()'>Build Granary (requires 15 wood, 10 stone)</button>" + 
+	"<button id=buyWarehouseButton onclick='buyWarehouse()'>Build Warehouse (requires 12 wood, 10 stone)</button>";
+  }
+  function createOtherChapter2Buttons(){
+	document.getElementById("buttonArea").innerHTML += "<button id=buyLoggingCampButton onclick='buyLoggingCamp()'>Build Logging Camp (requires 20 wood, 10 stone, 3 copper)</button>" +
+	"<button id=buyQuarryCampButton onclick='buyQuarryCamp()'>Build Quarry Camp (requires 10 wood, 20 stone, 3 copper)</button>";
+  }
   function skipChapter0(){
 	day = 10;
 	food = 30;
@@ -206,6 +215,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	food = 25;
 	wood = 40;
 	stone = 30;
+	console.log(cardSlots);
 	discoverStone(6);
 	discoverOrg(1);
 	discoverOrg(6);
@@ -271,9 +281,16 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		$("#victoryAudio")[0].play();
 		alert("You have begun the spark of civilization! The FOUR DICEMEN will surely come after you now. Be prepared to weather their tempests, as there is nothing that could possibly fight a god. Or is there? Your new kingdom will now need to grow even further. Perhaps you will rival the heights of the old kingdom?");
 		alert("Also, fair warning, this next bit is part of the now-incomplete next chapter.");
-		alert("You now have more than 8 cards. Use the organization tab to select which cards you would like to use.");
 		population = 3;
 		wrath = true;
+		createChapter2Buttons();
+		addCardToCardsList("discoveryCopper");
+		addCardToCardsList("discoveryExpedition");
+		addCardToCardsList("discoveryWriting");
+		addCardToSlots("discoveryCopper");
+		addCardToSlots("discoveryExpedition");
+		addCardToSlots("discoveryWriting");
+		alert("You now have more than 8 cards. Use the organization tab to select which cards you would like to use.");
 	}
 	repaintResources();
   }
@@ -383,6 +400,29 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			showTabs();
 		}
 	}
+  }
+  function discoverCopper(amountIn){
+	let amount = Number(amountIn);
+	if (secondDieStorage.discoveryCopper == 0 || secondDieStorage.discoveryOrg == null){
+		secondDieStorage.discoveryCopper = amount;
+		removeDie();
+		return false;
+	}
+	else{
+		if (amount == secondDieStorage.discoveryCopper){
+			//Unlock copper stuff
+			createOtherChapter2Buttons();
+			//create hunting card
+			//create copper mining card
+		}
+	}
+  }
+  function discoverExpedition(amountIn){
+	//Build me out, takes three dice, success if 15+.
+  }
+  function discoverWriting(amountIn){
+	//Build me out, takes a single die, success on 10+.
+	
   }
   function pepTalk(amount){
 		let toCreate = Number(amount)+1;
@@ -559,163 +599,141 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	console.log(cardSlots);
 		removeAllCards();
 		for (let i = 0; i < 8; i++){
-			if (cardSlots[i] == "scrounge"){
-				addCard(getScroungingCardData("regular"), i, false);
-			}
-			if (cardSlots[i] == "farming"){
-				addCard(getFarmingCardData("regular"), i, false);
-			}
-			if (cardSlots[i] == "gatherSticks"){
-				addCard(getSticksCardData("regular"), i, false);
-			}
-			if (cardSlots[i] == "logging"){
-				addCard(getLoggingCardData("regular"), i, false);
-			}
-			if (cardSlots[i] == "gatherStone"){
-				addCard(getGatherStoneCardData("regular"), i, false);
-			}
-			if (cardSlots[i] == "quarry"){
-				addCard(getQuarryCardData("regular"), i, false);
-			}
-			if (cardSlots[i] == "teamwork"){
-				addCard(getTeamworkCardData("regular"), i, false);
-			}
-			if (cardSlots[i] == "pepTalk"){
-				addCard(getPepTalkCardData("regular"), i, false);
-			}
-			if (cardSlots[i] == "discoveryStone"){
-				addCard(getDiscoveryStoneCardData("regular"), i, false);
-			}
-			if (cardSlots[i] == "discoveryOrg"){
-				addCard(getDiscoveryOrganizationCardData("regular"), i, false);
-			}
-			if (cardSlots[i] == "progressStone"){
-				addCard(getProgressStoneCardData("regular"), i, false);
-			}
+			addCard(getCardData(cardSlots[i], "regular"), i, false);
 		}
 	}
-	function getScroungingCardData(type){
-		if (type == "regular"){
-			return "<div id='scrounge' class='card food'>Scrounge<BR>Gain 2 food.<br>Unlimited use.<br><img src='./images/emptydie.png' ondrop='drop(event, scroungeWheat)' ondragover='allowDrop(event)'></img></div>";
-		}
-		else if (type == "org"){
-			return "<div id='orgScroungeBig' class='card food' onclick='orgCardRemove()'>Scrounge<BR>Gain 2 food.<br>Unlimited use.<br>1 Die</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgScroungeSmall' class='orgCard food' onclick='orgCardAdd()'>Scrounge<BR>+2 food.<br>1D</div>";
+	function getCardData(name, type){
+		switch(name){
+			case "scrounge":
+				if (type == "regular"){
+					return "<div id='scrounge' class='card food'>Scrounge<BR>Gain 2 food.<br>Unlimited use.<br><img src='./images/emptydie.png' ondrop='drop(event, scroungeWheat)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='orgScroungeBig' class='card food' onclick='orgCardRemove('orgScroungeBig')'>Scrounge<BR>Gain 2 food.<br>Unlimited use.<br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgScroungeSmall' class='orgCard food' onclick='orgCardAdd('orgScroungeSmall')'>Scrounge<BR>+2 food.<br>1D</div>";
+				}
+				break;
+			case "farming":
+				if (type == "regular"){
+					return "<div id='farm' class='card food'>Farm Wheat<BR>Gain X food.<br><img src='./images/emptydie.png' ondrop='drop(event, farmWheat)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='orgFarmBig' class='card food' onclick='orgCardRemove('orgFarmBig')'>Farm Wheat<BR>Gain X food.<br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgFarmSmall' class='orgCard food' onclick='orgCardAdd('orgFarmSmall')'>Farm Wheat<BR>+X food.<br>1D</div>";
+				}
+				break;
+			case "gatherSticks":
+				if (type == "regular"){
+					return "<div id='sticks' class='card wood'>Gather Sticks<BR>Gain X-3 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, gatherSticks)' ondragover='allowDrop(event)'></img></div>";
+				}		
+				else if (type == "org"){
+					return "<div id='orgSticksBig' class='card wood' onclick='orgCardRemove('orgSticksBig')'>Gather Sticks<BR>Gain X-3 wood.<br>Min Die: 4<br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgSticksSmall' class='orgCard wood' onclick='orgCardAdd('orgSticksSmall')'>Get Sticks<BR>+X-3 wood.<br>Req: >3<br>1D</div>";
+				}
+				break;
+			case "logging":
+				if (type == "regular"){
+					return "<div id='logging' class='card wood'>Logging<BR>Gain X-1 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, logging)' ondragover='allowDrop(event)'></img></div>";
+				}		
+				else if (type == "org"){
+					return "<div id='orgLoggingBig' class='card wood' onclick='orgCardRemove()'>Logging<BR>Gain X-1 wood.<br>Min Die: 4<br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgLoggingSmall' class='orgCard wood' onclick='orgCardAdd()'>Logging<BR>+X-1 wood.<br>Req: >3<br>1D</div>";
+				}
+			case "gatherStone":
+				if (type == "regular"){
+					return "<div id='gatherStone' class='card stone'>Gather Stone<BR>Gain 2 stone.<BR>Max Die: 2<br><img src='./images/emptydie.png' ondrop='drop(event, gatherStone)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='orgGatherStoneBig' class='card stone' onclick='orgCardRemove()'>Gather Stone<BR>Gain 2 stone.<Br>Max Die: 2<br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgGatherStoneSmall' class='orgCard stone' onclick='orgCardAdd()'>G. Stone<BR>+2 stone<Br>Req: <3<br>1D</div>";
+				}
+			case "quarry":
+				if (type == "regular"){
+					return "<div id='quarry' class='card stone'>Quarry Stone<BR>Gain X+1 stone.<br>Max Die: 3<br><img src='./images/emptydie.png' ondrop='drop(event, quarryStone)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='orgQuarryBig' class='card stone' onclick='orgCardRemove()'>Quarry Stone<BR>Gain X+1 stone.<Br>Max Die: 3<br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgQuarrySmall' class='orgCard stone' onclick='orgCardAdd()'>Quarry<BR>+X+1 stone<Br>Req: <4<br>1D</div>";
+				}
+			case "teamwork":
+				if (type == "regular"){
+					return "<div id='teamwork' class='card organization'>Teamwork<BR>Combine 2 dice.<BR><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='orgTeamworkBig' class='card organization' onclick='orgCardRemove()'>Teamwork<BR>Combine 2 dice.<Br>2 Dice</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgTeamworkSmall' class='orgCard organization' onclick='orgCardAdd()'>Teamwork<BR>Combine<Br>2D</div>";
+				}
+			case "pepTalk":
+				if (type == "regular"){
+					return "<div id='pepTalk' class='card organization'>Pep Talk<BR>Add 1 to die value.<br><img src='./images/emptydie.png' ondrop='drop(event, pepTalk)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='orgPepTalkBig' class='card organization' onclick='orgCardRemove()'>Pep Talk<BR>Add 1 to die value.<Br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgPepTalkSmall' class='orgCard organization' onclick='orgCardAdd()'>Pep Talk<BR>+1 die val<Br>1D</div>";
+				}
+			case "discoveryStone":
+				if (type == "regular"){
+					return "<div id='discoveryStone' class='card science'>Discovery: Stone<BR>Find a way to work with stone.<Br>Req. Die: 6<br><img src='./images/emptydie.png' ondrop='drop(event, discoverStone)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='orgDiscoveryStoneBig' class='card science' onclick='orgCardRemove()'>Discovery: Stone<BR>Find a way to work with stone.<Br>Req. Die: 6<br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgDiscoveryStoneSmall' class='orgCard science' onclick='orgCardAdd()'>D: Stone<BR>Research.<Br>Req: 6<br>1 Die</div>";
+				}
+				break;
+			case "discoveryOrg":
+				if (type == "regular"){
+					return "<div id='discoveryOrg' class='card science'>Discovery: Organization<BR>Communication is key!<Br>Total: =7<br><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='orgDiscoveryOrgBig' class='card science' onclick='orgCardRemove()'>Discovery: Organization<BR>Communication is key!<Br>Total: =7<br>2 Dice</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgDiscoveryOrgSmall' class='orgCard science' onclick='orgCardAdd()'>D: Org<BR>Research.<Br>Req: =7<br>2D</div>";
+				}
+			case "progressStone":
+				if (type == "regular"){
+					return "<div id='progressStone' class='card science'>Progress: Stone<BR>More applications for stone.<BR>Total: 8+<br><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='orgProgressStoneBig' class='card science' onclick='orgCardRemove()'>Progress: Stone<BR>More applications for stone.<Br>Total: 8+<br>2 Dice</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgProgressStoneSmall' class='orgCard science' onclick='orgCardAdd()'>D: Org<BR>Research.<Br>Req: 8+<br>2D</div>";
+				}
+			case "discoveryCopper":
+				if (type == "regular"){
+					return "<div id='discoveryStone' class='card science'>Discovery: Copper<BR>Refine these useless ores!<Br>Req. doubles<br><img src='./images/emptydie.png' ondrop='drop(event, discoverCopper)' ondragover='allowDrop(event)'></img>=<img src='./images/emptydie.png' ondrop='drop(event, discoverCopper)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='orgDiscoveryStoneBig' class='card science' onclick='orgCardRemove()'>Discovery: Copper<BR>Refine these useless ores!<Br>Req. Doubles<br>2 Dice</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='orgDiscoveryStoneSmall' class='orgCard science' onclick='orgCardAdd()'>D: Copper<BR>Research.<Br>Req: Doubles<br>2 Dice</div>";
+				}
+				break;	
+			default:
+				return "";
+				break;
 		}
 	}
-	function getFarmingCardData(type){
-		if (type == "regular"){
-			return "<div id='farm' class='card food'>Farm Wheat<BR>Gain X food.<br><img src='./images/emptydie.png' ondrop='drop(event, farmWheat)' ondragover='allowDrop(event)'></img></div>";
-		}
-		else if (type == "org"){
-			return "<div id='orgFarmBig' class='card food' onclick='orgCardRemove()'>Farm Wheat<BR>Gain X food.<br>1 Die</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgFarmSmall' class='orgCard food' onclick='orgCardAdd()'>Farm Wheat<BR>+X food.<br>1D</div>";
-		}
-	}
-	function getSticksCardData(type){
-		if (type == "regular"){
-			return "<div id='sticks' class='card wood'>Gather Sticks<BR>Gain X-3 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, gatherSticks)' ondragover='allowDrop(event)'></img></div>";
-		}		
-		else if (type == "org"){
-			return "<div id='orgSticksBig' class='card wood' onclick='orgCardRemove()'>Gather Sticks<BR>Gain X-3 wood.<br>Min Die: 4<br>1 Die</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgSticksSmall' class='orgCard wood' onclick='orgCardAdd()'>Get Sticks<BR>+X-3 wood.<br>Req: >3<br>1D</div>";
-		}
-	}
-	function getDiscoveryStoneCardData(type){
-		if (type == "regular"){
-			return "<div id='discoveryStone' class='card science'>Discovery: Stone<BR>Find a way to work with stone.<Br>Req. Die: 6<br><img src='./images/emptydie.png' ondrop='drop(event, discoverStone)' ondragover='allowDrop(event)'></img></div>";
-		}
-		else if (type == "org"){
-			return "<div id='orgDiscoveryStoneBig' class='card science' onclick='orgCardRemove()'>Discovery: Stone<BR>Find a way to work with stone.<Br>Req. Die: 6<br>1 Die</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgDiscoveryStoneSmall' class='orgCard science' onclick='orgCardAdd()'>D: Stone<BR>Research.<Br>Req: 6<br>1 Die</div>";
-		}
-	}
-	function getDiscoveryOrganizationCardData(type){
-		if (type == "regular"){
-			return "<div id='discoveryOrg' class='card science'>Discovery: Organization<BR>Communication is key!<Br>Total: =7<br><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, discoverOrg)' ondragover='allowDrop(event)'></img></div>";
-		}
-		else if (type == "org"){
-			return "<div id='orgDiscoveryOrgBig' class='card science' onclick='orgCardRemove()'>Discovery: Organization<BR>Communication is key!<Br>Total: =7<br>2 Dice</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgDiscoveryOrgSmall' class='orgCard science' onclick='orgCardAdd()'>D: Org<BR>Research.<Br>Req: =7<br>2D</div>";
-		}
-	}
-	function getProgressStoneCardData(type){
-		if (type == "regular"){
-			return "<div id='progressStone' class='card science'>Progress: Stone<BR>More applications for stone.<BR>Total: 8+<br><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img></div>";
-		}
-		else if (type == "org"){
-			return "<div id='orgProgressStoneBig' class='card science' onclick='orgCardRemove()'>Progress: Stone<BR>More applications for stone.<Br>Total: 8+<br>2 Dice</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgProgressStoneSmall' class='orgCard science' onclick='orgCardAdd()'>D: Org<BR>Research.<Br>Req: 8+<br>2D</div>";
-		}
-	}
-	function getGatherStoneCardData(type){
-		if (type == "regular"){
-			return "<div id='gatherStone' class='card stone'>Gather Stone<BR>Gain 2 stone.<BR>Max Die: 2<br><img src='./images/emptydie.png' ondrop='drop(event, gatherStone)' ondragover='allowDrop(event)'></img></div>";
-		}
-		else if (type == "org"){
-			return "<div id='orgGatherStoneBig' class='card stone' onclick='orgCardRemove()'>Gather Stone<BR>Gain 2 stone.<Br>Max Die: 2<br>1 Die</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgGatherStoneSmall' class='orgCard stone' onclick='orgCardAdd()'>G. Stone<BR>+2 stone<Br>Req: <3<br>1D</div>";
-		}
-	}
-	function getTeamworkCardData(type){
-		if (type == "regular"){
-			return "<div id='teamwork' class='card organization'>Teamwork<BR>Combine 2 dice.<BR><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img></div>";
-		}
-		else if (type == "org"){
-			return "<div id='orgTeamworkBig' class='card organization' onclick='orgCardRemove()'>Teamwork<BR>Combine 2 dice.<Br>2 Dice</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgTeamworkSmall' class='orgCard organization' onclick='orgCardAdd()'>Teamwork<BR>Combine<Br>2D</div>";
-		}
-	}
-	function getPepTalkCardData(type){
-		if (type == "regular"){
-			return "<div id='pepTalk' class='card organization'>Pep Talk<BR>Add 1 to die value.<br><img src='./images/emptydie.png' ondrop='drop(event, pepTalk)' ondragover='allowDrop(event)'></img></div>";
-		}
-		else if (type == "org"){
-			return "<div id='orgPepTalkBig' class='card organization' onclick='orgCardRemove()'>Pep Talk<BR>Add 1 to die value.<Br>1 Die</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgPepTalkSmall' class='orgCard organization' onclick='orgCardAdd()'>Pep Talk<BR>+1 die val<Br>1D</div>";
-		}
-	}
-	function getLoggingCardData(type){
-		if (type == "regular"){
-			return "<div id='logging' class='card wood'>Logging<BR>Gain X-1 wood.<br>Min Die: 4<br><img src='./images/emptydie.png' ondrop='drop(event, logging)' ondragover='allowDrop(event)'></img></div>";
-		}		
-		else if (type == "org"){
-			return "<div id='orgLoggingBig' class='card wood' onclick='orgCardRemove()'>Logging<BR>Gain X-1 wood.<br>Min Die: 4<br>1 Die</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgLoggingSmall' class='orgCard wood' onclick='orgCardAdd()'>Logging<BR>+X-1 wood.<br>Req: >3<br>1D</div>";
-		}
-	}
-	function getQuarryCardData(type){
-		if (type == "regular"){
-			return "<div id='quarry' class='card stone'>Quarry Stone<BR>Gain X+1 stone.<br>Max Die: 3<br><img src='./images/emptydie.png' ondrop='drop(event, quarryStone)' ondragover='allowDrop(event)'></img></div>";
-		}
-		else if (type == "org"){
-			return "<div id='orgQuarryBig' class='card stone' onclick='orgCardRemove()'>Quarry Stone<BR>Gain X+1 stone.<Br>Max Die: 3<br>1 Die</div>";
-		}
-		else if (type == "orgSmall"){
-			return "<div id='orgQuarrySmall' class='orgCard stone' onclick='orgCardAdd()'>Quarry<BR>+X+1 stone<Br>Req: <4<br>1D</div>";
-		}
-	}
-	//STOP HERE
 	function addCardToSlots(cardName){
 		for (let i = 0; i < 8; i++){
 			if (cardSlots[i] == ""){
@@ -745,10 +763,13 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	}
 	function removeCard(cardName){
 		cardsAssigned--;
-		let x = document.getElementById(cardName);
-		let y = x.parentNode;
-		let z = y.id;
-		y.innerHTML = "<div class='card'></div>";
+		try{
+			let x = document.getElementById(cardName);
+			let y = x.parentNode;
+			let z = y.id;
+			y.innerHTML = "<div class='card'></div>";
+		}
+		catch{}
 		//shiftCards(z);
 	}
 	function removeAllCards(){
@@ -821,7 +842,9 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				wrathText = wrathText + stoneDamage + " stone";
 			}
 			wrathText = wrathText + ".</font>"
-			document.getElementById("messageArea").innerHTML = wrathText;
+			if (foodDamage > 0 || woodDamage > 0 || stoneDamage > 0){
+				document.getElementById("messageArea").innerHTML = wrathText;
+			}
 		}
 	}
 	function buildOrgPage(){
@@ -829,6 +852,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			orgCardSlots[i] = cardSlots[i]; // orgCardSlots needs to be a copy of cardSlots
 		}
 		buildOrgCards();
+		buildSmallOrgCards();
 	}
 	function removeAllOrgCards(){
 		document.getElementById("orgCardArea1").innerHTML = "";
@@ -843,42 +867,28 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	function buildOrgCards(){
 		removeAllOrgCards();
 		for (let i = 0; i < 8; i++){
-			if (orgCardSlots[i] == "scrounge"){
-				addCard(getScroungingCardData("org"), i, true);
-			}
-			if (orgCardSlots[i] == "farming"){
-				addCard(getFarmingCardData("org"), i, true);
-			}
-			if (orgCardSlots[i] == "gatherSticks"){
-				addCard(getSticksCardData("org"), i, true);
-			}
-			if (orgCardSlots[i] == "logging"){
-				addCard(getLoggingCardData("org"), i, true);
-			}
-			if (orgCardSlots[i] == "gatherStone"){
-				addCard(getGatherStoneCardData("org"), i, true);
-			}
-			if (orgCardSlots[i] == "quarry"){
-				addCard(getQuarryCardData("org"), i, true);
-			}
-			if (orgCardSlots[i] == "teamwork"){
-				addCard(getTeamworkCardData("org"), i, true);
-			}
-			if (orgCardSlots[i] == "pepTalk"){
-				addCard(getPepTalkCardData("org"), i, true);
-			}
-			if (orgCardSlots[i] == "discoveryStone"){
-				addCard(getDiscoveryStoneCardData("org"), i, true);
-			}
-			if (orgCardSlots[i] == "discoveryOrg"){
-				addCard(getDiscoveryOrganizationCardData("org"), i, true);
-			}
-			if (orgCardSlots[i] == "progressStone"){
-				addCard(getProgressStoneCardData("org"), i, true);
-			}
+			addCard(getCardData(orgCardSlots[i], "org"), i, true);
 		}
 	}
-	
+	function buildSmallOrgCards(){
+		//Until I find a better way to do this, I'm going to have it spit out the cards, in order.
+		let output = "<table><tr>";
+		let placedCards = 0;
+		for (let i = 0; i < cards.length; i++){
+			if (!orgCardSlots.includes(cards[i]) && !completedScience.includes(cards[i])){
+				output += "<td>"
+				output += getCardData(cards[i], "orgSmall");
+				output += "</td>"
+				placedCards++;
+				if (placedCards == 6){
+					placedCards = 0;
+					output += "</tr><tr>";
+				}
+			}
+		}
+		output += "</tr></table>"
+		document.getElementById("orgButtonArea").innerHTML = output;
+	}
 	
   </script>
 </html>
