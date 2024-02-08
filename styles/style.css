@@ -76,6 +76,15 @@
 	background-color: #CCCCCC;
 }
 
+.copper{
+	background-color: #9F543E;
+	color: #FFFFFF;
+}
+
+.invisible{
+	visibility: hidden;
+}
+
 .organization{
 	background-color: #5D5DFF
 }

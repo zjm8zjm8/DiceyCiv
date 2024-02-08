@@ -32,6 +32,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				<td class="resourcesArea food"><div id="Wheat">0 food</div></td>
 				<td class="resourcesArea wood"><div id="Wood">0 wood</div></td>
 				<td class="resourcesArea stone"><div id="Stone">0 stone</div></td>
+				<td class="resourcesArea copper invisible"><div id="Copper">0 Copper</div></td>
 			</tr>
 		</table><br>
 		<div id = 'messageArea'></div>
@@ -106,6 +107,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var woodStorage = 15;
   var stone = 0;
   var stoneStorage = 10;
+  var copper = 0;
+  var copperStorage = 10;
   var wrath = false;
   var population = 2;
   var cardsAssigned = 0;
@@ -120,6 +123,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var orgCardSlots = ["", "", "", "", "", "", "", ""];
   var cards = ["scrounge"];
   var completedScience = [];
+  var expeditionCountdown = 35;
   
   function openTab(evt, tabName) {
   // Declare all variables
@@ -341,6 +345,15 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	removeDie();
 	removeCard("farm");
   }
+  function doHunting(amount){
+	if (amount != 6){
+		return false;
+	}
+	food += 10;
+	repaintResources();
+	removeDie();
+	removeCard("hunting");
+  }
   function gatherSticks(amount){
 	if (amount < 4){
 		return false;
@@ -402,6 +415,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	}
   }
   function discoverCopper(amountIn){
+  console.log("hi");
 	let amount = Number(amountIn);
 	if (secondDieStorage.discoveryCopper == 0 || secondDieStorage.discoveryOrg == null){
 		secondDieStorage.discoveryCopper = amount;
@@ -410,10 +424,20 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	}
 	else{
 		if (amount == secondDieStorage.discoveryCopper){
+			unlocks.completedDiscoverCopper = true;
+			removeCard("discoveryCopper");
+			removeCardFromSlots("discoveryCopper");
+			completedScience.push("discoveryCopper");
 			//Unlock copper stuff
 			createOtherChapter2Buttons();
 			//create hunting card
+			addCardToCardsList("hunting");
+			addCardToSlots("hunting");
 			//create copper mining card
+			addCardToSlots("mineCopper");
+			addCardToCardsList("mineCopper");
+			organizeCooldown = 0;
+			document.getElementById("Copper").parentElement.classList.remove("invisible");
 		}
 	}
   }
@@ -512,6 +536,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	secondDieStorage.discoveryOrg = 0;
 	secondDieStorage.teamwork = 0;
 	secondDieStorage.progressStone = 0;
+	secondDieStorage.discoveryCopper = 0;
 	if (organizeCooldown > 0){
 		organizeCooldown--;
 		if (organizeCooldown == 0){
@@ -720,15 +745,59 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				}
 			case "discoveryCopper":
 				if (type == "regular"){
-					return "<div id='discoveryStone' class='card science'>Discovery: Copper<BR>Refine these useless ores!<Br>Req. doubles<br><img src='./images/emptydie.png' ondrop='drop(event, discoverCopper)' ondragover='allowDrop(event)'></img>=<img src='./images/emptydie.png' ondrop='drop(event, discoverCopper)' ondragover='allowDrop(event)'></img></div>";
+					return "<div id='discoveryCopper' class='card science'>Discovery: Copper<BR>Refine these useless ores!<Br>Req. doubles<br><img src='./images/emptydie.png' ondrop='drop(event, discoverCopper)' ondragover='allowDrop(event)'></img>=<img src='./images/emptydie.png' ondrop='drop(event, discoverCopper)' ondragover='allowDrop(event)'></img></div>";
 				}
 				else if (type == "org"){
-					return "<div id='orgDiscoveryStoneBig' class='card science' onclick='orgCardRemove(\"discoveryCopper\")'>Discovery: Copper<BR>Refine these useless ores!<Br>Req. Doubles<br>2 Dice</div>";
+					return "<div id='discoveryCopperBig' class='card science' onclick='orgCardRemove(\"discoveryCopper\")'>Discovery: Copper<BR>Refine these useless ores!<Br>Req. Doubles<br>2 Dice</div>";
 				}
 				else if (type == "orgSmall"){
-					return "<div id='orgDiscoveryStoneSmall' class='orgCard science' onclick='orgCardAdd(\"discoveryCopper\")'>D: Copper<BR>Research.<Br>Req: Doubles<br>2 Dice</div>";
+					return "<div id='discoveryCopperSmall' class='orgCard science' onclick='orgCardAdd(\"discoveryCopper\")'>D: Copper<BR>Research.<Br>Req: Doubles<br>2 Dice</div>";
 				}
-				break;	
+				break;
+			case "hunting":
+				if (type == "regular"){
+					return "<div id='hunting' class='card food'>Hunting<BR>Gain 10 food!<Br>Req. 6<br><img src='./images/emptydie.png' ondrop='drop(event, doHunting)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='huntingBig' class='card food' onclick='orgCardRemove(\"hunting\")'>Hunting<BR>Gain 10 food.<Br>Req. 6</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='huntingSmall' class='orgCard food' onclick='orgCardAdd(\"hunting\")'>Hunting<BR>Gain 10 food.<Br>Req: 6<br>1D</div>";
+				}
+				break;
+			case "mineCopper":
+				if (type == "regular"){
+					return "<div id='mineCopper' class='card copper'>Mine Copper<BR>Gain 1 copper.<Br>Req. 1<br><img src='./images/emptydie.png' ondrop='drop(event, mineCopper)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='mineCopperBig' class='card copper' onclick='orgCardRemove(\"mineCopper\")'>Mine Copper<BR>Gain 1 copper.<Br>Req. 1<br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='mineCopperSmall' class='orgCard copper' onclick='orgCardAdd(\"mineCopper\")'>Mine Copper<BR>Gain copper<Br>Req: 1<br>1 Die</div>";
+				}
+				break;
+			case "discoveryWriting":
+				if (type == "regular"){
+					return "<div id='discoveryWriting' class='card science'>Discovery: Writing<BR>A writing system will encourage further growth.<Br>Req. exactly 10<br><img src='./images/emptydie.png' ondrop='drop(event, discoverWriting)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='discoveryWritingBig' class='card science' onclick='orgCardRemove(\"discoveryWriting\")'>Discovery: Writing<BR>A writing system will encourage further growth.<Br>Req. exactly 10<br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='discoveryWritingSmall' class='orgCard science' onclick='orgCardAdd(\"discoveryWriting\")'>D: Writing<BR>Research.<Br>Req: 10<br>1 Die</div>";
+				}
+				break;
+			case "discoveryExpedition":
+				if (type == "regular"){
+					return "<div id='discoveryExpedition' class='card science'>Expedition:<BR>Travel to the old city to find information.<Br>Countdown: "+expeditionCountdown+"<br><img src='./images/emptydie.png' ondrop='drop(event, discoverExpedition)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='discoveryExpeditionBig' class='card science' onclick='orgCardRemove(\"discoveryExpedition\")'>Expedition:<br>Travel to the old city to find information.<BR>Refine these useless ores!<Br>Req. Doubles<br>2 Dice</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='discoveryExpeditionSmall' class='orgCard science' onclick='orgCardAdd(\"discoveryExpedition\")'>Expedition<BR>Research.<Br>Req: Doubles<br>2 Dice</div>";
+				}
+				break;
 			default:
 				return "";
 				break;
@@ -810,6 +879,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		}
 		document.getElementById('Wood').innerHTML = wood + " wood";
 		document.getElementById('Stone').innerHTML = stone + " stone";
+		document.getElementById('Copper').innerHTML = copper + " copper";
 	}
 	function computeWrath(){
 		let wrathValue = Math.max(0, food - foodStorage) + Math.max(0, wood - woodStorage) + Math.max(0, stone - stoneStorage);
