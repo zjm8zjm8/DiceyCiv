@@ -128,6 +128,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var copper = 0;
   var copperStorage = 10;
   var wrath = false;
+  var showMaximums = false;
   var population = 2;
   var cardsAssigned = 0;
   var maxCards = 8;//4;
@@ -410,8 +411,22 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	//Build me out, takes three dice, success if 15+.
   }
   function discoverWriting(amountIn){
-	//Build me out, takes a single die, success on 10+.
-	
+	if(amountIn != 10){
+		return false;
+	}
+	removeDie();
+	removeCard("discoveryWriting");
+	removeCardFromSlots("discoveryWriting");
+	completedScience.push("discoveryWriting");
+	//Grant rewards from completing writing.
+	// Split Up Card
+	addCardToCardsList("splitUp");
+	addCardToSlots("splitUp");
+	organizeCooldown = 0;
+	paintOrganizeTab();
+	// Show safe maximums in stockage area
+	showMaximums = true;
+	repaintResources();
   }
   function pepTalk(amount){
 		let toCreate = Number(amount)+1;
@@ -431,6 +446,13 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		secondDieStorage.teamwork = 0;
 		generateDice(combo);
 		removeCard("teamwork");
+	}
+  }
+  function doSplitUp(amount){
+	if (amount > 1){
+		removeDie();
+		removeCard("splitUp");
+		splitDie(amount);
 	}
   }
   function doMineCopper(amount){
@@ -595,6 +617,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				else if (type == "orgSmall"){
 					return "<div id='orgQuarrySmall' class='orgCard stone' onclick='orgCardAdd(\"quarry\")'>Quarry<BR>+X+1 stone<Br>Req: <4<br>1D</div>";
 				}
+				break;
 			case "teamwork":
 				if (type == "regular"){
 					return "<div id='teamwork' class='card organization'>Teamwork<BR>Combine 2 dice.<BR><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, teamwork)' ondragover='allowDrop(event)'></img></div>";
@@ -605,6 +628,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				else if (type == "orgSmall"){
 					return "<div id='orgTeamworkSmall' class='orgCard organization' onclick='orgCardAdd(\"teamwork\")'>Teamwork<BR>Combine<Br>2D</div>";
 				}
+				break;
 			case "pepTalk":
 				if (type == "regular"){
 					return "<div id='pepTalk' class='card organization'>Pep Talk<BR>Add 1 to die value.<br><img src='./images/emptydie.png' ondrop='drop(event, pepTalk)' ondragover='allowDrop(event)'></img></div>";
@@ -615,6 +639,18 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				else if (type == "orgSmall"){
 					return "<div id='orgPepTalkSmall' class='orgCard organization' onclick='orgCardAdd(\"pepTalk\")'>Pep Talk<BR>+1 die val<Br>1D</div>";
 				}
+				break;
+			case "splitUp":
+				if (type == "regular"){
+					return "<div id='splitUp' class='card organization'>Split Up<BR>Split a die into two, randomly.<Br><br><img src='./images/emptydie.png' ondrop='drop(event, doSplitUp)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='splitUpBig' class='card organization' onclick='orgCardRemove(\"splitUp\")'>Split Up<br>Split a die into two, randomly.<Br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='splitUpSmall' class='orgCard organization' onclick='orgCardAdd(\"splitUp\")'>Split Up<BR>1 Die<br>"+expeditionCountdown+"</div>";
+				}
+				break;
 			case "discoveryStone":
 				if (type == "regular"){
 					return "<div id='discoveryStone' class='card science'>Discovery: Stone<BR>Find a way to work with stone.<Br>Req. Die: 6<br><img src='./images/emptydie.png' ondrop='drop(event, discoverStone)' ondragover='allowDrop(event)'></img></div>";
@@ -636,6 +672,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				else if (type == "orgSmall"){
 					return "<div id='orgDiscoveryOrgSmall' class='orgCard science' onclick='orgCardAdd(\"discoveryOrg\")'>D: Org<BR>Research.<Br>Req: =7<br>2D</div>";
 				}
+				break;
 			case "progressStone":
 				if (type == "regular"){
 					return "<div id='progressStone' class='card science'>Progress: Stone<BR>More applications for stone.<BR>Total: 8+<br><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img><img src='./images/emptydie.png' ondrop='drop(event, progressStone)' ondragover='allowDrop(event)'></img></div>";
@@ -646,6 +683,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				else if (type == "orgSmall"){
 					return "<div id='orgProgressStoneSmall' class='orgCard science' onclick='orgCardAdd(\"progressStone\")'>D: Org<BR>Research.<Br>Req: 8+<br>2D</div>";
 				}
+				break;
 			case "discoveryCopper":
 				if (type == "regular"){
 					return "<div id='discoveryCopper' class='card science'>Discovery: Copper<BR>Refine these useless ores!<Br>Req. doubles<br><img src='./images/emptydie.png' ondrop='drop(event, discoverCopper)' ondragover='allowDrop(event)'></img>=<img src='./images/emptydie.png' ondrop='drop(event, discoverCopper)' ondragover='allowDrop(event)'></img></div>";
@@ -774,15 +812,29 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	}
 	function repaintResources(){
 		document.getElementById("Day").innerHTML = "Day " + day + "";
-		if (food <= 0){
-			document.getElementById('Wheat').innerHTML = "<font color=red>" + food + "</font> food";
+		if (showMaximums == false){
+			if (food <= 0){
+				document.getElementById('Wheat').innerHTML = "<font color=red>" + food + "</font> food";
+			}
+			else{
+				document.getElementById('Wheat').innerHTML = food + " food";
+			}
+			document.getElementById('Wood').innerHTML = wood + " wood";
+			document.getElementById('Stone').innerHTML = stone + " stone";
+			document.getElementById('Copper').innerHTML = copper + " copper";
 		}
 		else{
-			document.getElementById('Wheat').innerHTML = food + " food";
+			if (food <= 0){
+				document.getElementById('Wheat').innerHTML = "<font color=red>" + food + "/" + foodStorage + "</font> food";
+			}
+			else{
+				document.getElementById('Wheat').innerHTML = food + "/" + foodStorage + " food";
+			}
+			document.getElementById('Wood').innerHTML = wood + "/" + woodStorage +" wood";
+			document.getElementById('Stone').innerHTML = stone + "/" + stoneStorage +" stone";
+			document.getElementById('Copper').innerHTML = copper + "/" + copperStorage +" copper";
+
 		}
-		document.getElementById('Wood').innerHTML = wood + " wood";
-		document.getElementById('Stone').innerHTML = stone + " stone";
-		document.getElementById('Copper').innerHTML = copper + " copper";
 	}
 	function computeWrath(){
 		let wrathValue = Math.max(0, food - foodStorage) + Math.max(0, wood - woodStorage) + Math.max(0, stone - stoneStorage);
