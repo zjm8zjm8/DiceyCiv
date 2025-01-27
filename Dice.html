@@ -18,6 +18,24 @@
   <script src="
 https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 "></script>
+	<!-- 
+		gameUtils.js
+		The 'game engine', if you will.
+		Method headers:
+		allowDrop()
+		drag()
+		drop()
+		openTab()
+		showTabs()
+		hideTabs()
+		generateDice()
+		getRandomDieRoll()
+		lookupImageSource()
+		generateId()
+		removeDie()
+		splitDie()
+	-->
+	<script type="text/javascript" src="js/gameUtils.js"></script>
 	<link href="./styles/style.css" rel="stylesheet" type="text/css" />
   <body>
 	<div id="tabs" class="tab" style="display:none;">
@@ -125,37 +143,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var completedScience = [];
   var expeditionCountdown = 35;
   
-  function openTab(evt, tabName) {
-  // Declare all variables
-  var i, tabcontent, tablinks;
-	if (tabName == "org"){
-		if (organizeCooldown > 0){
-			tabName = "home";
-		}
-		buildOrgPage();
-	}
-  // Get all elements with class="tabcontent" and hide them
-  tabcontent = document.getElementsByClassName("tabcontent");
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = "none";
-  }
-
-  // Get all elements with class="tablinks" and remove the class "active"
-  tablinks = document.getElementsByClassName("tablinks");
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(" active", "");
-  }
-
-  // Show the current tab, and add an "active" class to the button that opened the tab
-  document.getElementById(tabName).style.display = "block";
-  evt.currentTarget.className += " active";
-}
-	function hideTabs(){
-		document.getElementById("tabs").style.display = "none";
-	}
-	function showTabs(){
-		document.getElementById("tabs").style.display = "block";
-	}
+  
   window.onload = function(e){
 	//loadGame();
 	addCardToSlots("scrounge");
@@ -176,14 +164,6 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	"It was destroyed by the FOUR DICEMEN OF THE APOCALYPSE. " +
 	"You are in an idyllic meadow, and the thought strikes you that you might be the one " + 
 	"who could rebuild the KINGDOM OF DICE.");
-  }
-  
-  function allowDrop(event){
-	event.preventDefault();
-  }
-  
-  function drag(event){
-	event.dataTransfer.setData("text", event.target.id);
   }
   
   function createChapter0Buttons(){
@@ -316,23 +296,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	}
 	repaintResources();
   }
-  // Using callback to allow cards to specify function on the fly.
-  function drop(event, callback){
-	event.preventDefault();
-	var selDie = event.dataTransfer.getData("text");
-	currentDie = event.dataTransfer.getData("text");
-	callback(Number($("#"+selDie).data("dieVal")));
-  }
-  
-  function removeDie()
-  {
-	if (currentDie == null){
-		return;
-	}
-	if (currentDie.length > 0)
-		document.getElementById(currentDie).remove();
-	currentDie = "";
-  }
+
   
   function scroungeWheat(){
 	food += 2;
@@ -437,6 +401,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			addCardToSlots("mineCopper");
 			addCardToCardsList("mineCopper");
 			organizeCooldown = 0;
+			paintOrganizeTab();
 			document.getElementById("Copper").parentElement.classList.remove("invisible");
 		}
 	}
@@ -464,12 +429,18 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	removeDie();
 		let combo = Number(amount) + Number(secondDieStorage.teamwork);
 		secondDieStorage.teamwork = 0;
-		if (combo > 12){
-			combo = 12;
-		}
 		generateDice(combo);
 		removeCard("teamwork");
 	}
+  }
+  function doMineCopper(amount){
+	if (amount > 1){
+		return false;
+	}
+	copper += 1;
+	repaintResources();
+	removeDie();
+	removeCard("mineCopper");
   }
   function progressStone(amount){
 	if (secondDieStorage.progressStone == 0 || secondDieStorage.progressStone == null){
@@ -539,12 +510,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	secondDieStorage.discoveryCopper = 0;
 	if (organizeCooldown > 0){
 		organizeCooldown--;
-		if (organizeCooldown == 0){
-			document.getElementById("orgTabButton").innerHTML = "Organize";
-		}
-		else{
-			document.getElementById("orgTabButton").innerHTML = organizeCooldown;
-		}
+		paintOrganizeTab();
 	}
 		// Refactor causes this to fail on the first day. Try catch removes the error.
 	var resp = $("#rollAudio")[0].play();
@@ -556,70 +522,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		});
 	}
   }
-  function generateDice(value){
-	var dieVal = 0;
-	if (value == 0){
-		dieVal = getRandomDieRoll();
-	}
-	else{
-		dieVal = value;
-	}
-	var id = generateId();
-	var imgsrc = lookupImageSource(dieVal);
-	var element = "<img id='"+id+"' src='"+imgsrc+"' draggable='true' ondragstart='drag(event)'></img>";
-	$("#diceArea").append(element);
-	$("#"+id).data("dieVal", dieVal);
-	return 0;
-	}
-	
-	function getRandomDieRoll(){
-		return Math.floor(Math.random()*6)+1;
-	}
-	
-	function lookupImageSource(value){
-		switch(value)
-		{
-			case 1:
-				return "./images/onedie.png";
-			case 2:
-				return "./images/twodie.png";
-			case 3:
-				return "./images/threedie.png";
-			case 4:
-				return "./images/fourdie.png";
-			case 5:
-				return "./images/fivedie.png";
-			case 6:
-				return "./images/sixdie.png";
-			case 7:
-				return "./images/sevendie.png";
-			case 8:
-				return "./images/eightdie.png";
-			case 9:
-				return "./images/ninedie.png";
-			case 10:
-				return "./images/tendie.png";
-			case 11:
-				return "./images/elevendie.png";
-			case 12:
-				return "./images/twelvedie.png";
-			default:
-				return "./images/emptydie.png";
-		
-		}
-	}
-	
-	function generateId(){
-		var text = '';
-		var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-		for(var i=0; i < 24; i++)
-		{
-			text += possible.charAt(Math.floor(Math.random() * possible.length));
-		}
-
-		return text;
-	}
 	function rebuildCards(){
 	console.log(cardSlots);
 		removeAllCards();
@@ -767,7 +670,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				break;
 			case "mineCopper":
 				if (type == "regular"){
-					return "<div id='mineCopper' class='card copper'>Mine Copper<BR>Gain 1 copper.<Br>Req. 1<br><img src='./images/emptydie.png' ondrop='drop(event, mineCopper)' ondragover='allowDrop(event)'></img></div>";
+					return "<div id='mineCopper' class='card copper'>Mine Copper<BR>Gain 1 copper.<Br>Req. 1<br><img src='./images/emptydie.png' ondrop='drop(event, doMineCopper)' ondragover='allowDrop(event)'></img></div>";
 				}
 				else if (type == "org"){
 					return "<div id='mineCopperBig' class='card copper' onclick='orgCardRemove(\"mineCopper\")'>Mine Copper<BR>Gain 1 copper.<Br>Req. 1<br>1 Die</div>";
@@ -792,10 +695,10 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 					return "<div id='discoveryExpedition' class='card science'>Expedition:<BR>Travel to the old city to find information.<Br>Countdown: "+expeditionCountdown+"<br><img src='./images/emptydie.png' ondrop='drop(event, discoverExpedition)' ondragover='allowDrop(event)'></img></div>";
 				}
 				else if (type == "org"){
-					return "<div id='discoveryExpeditionBig' class='card science' onclick='orgCardRemove(\"discoveryExpedition\")'>Expedition:<br>Travel to the old city to find information.<BR>Refine these useless ores!<Br>Req. Doubles<br>2 Dice</div>";
+					return "<div id='discoveryExpeditionBig' class='card science' onclick='orgCardRemove(\"discoveryExpedition\")'>Expedition:<br>Travel to the old city to find information.<Br>Countdown<br>"+expeditionCountdown+"</div>";
 				}
 				else if (type == "orgSmall"){
-					return "<div id='discoveryExpeditionSmall' class='orgCard science' onclick='orgCardAdd(\"discoveryExpedition\")'>Expedition<BR>Research.<Br>Req: Doubles<br>2 Dice</div>";
+					return "<div id='discoveryExpeditionSmall' class='orgCard science' onclick='orgCardAdd(\"discoveryExpedition\")'>Expedition<BR>Research.<Br>Countdown<br>"+expeditionCountdown+"</div>";
 				}
 				break;
 			default:
@@ -987,6 +890,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	}
 	function commitOrg(){
 		organizeCooldown = 10;
+		paintOrganizeTab();
 		for (let i = 0; i<8; i++){
 			cardSlots[i] = orgCardSlots[i];
 		}
