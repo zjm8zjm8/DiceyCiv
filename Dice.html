@@ -120,12 +120,16 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   <script>
   var day = 0;
   var food = 4;
+  var foodBonus = 0;
   var foodStorage = 20;
   var wood = 0;
+  var woodBonus = 0;
   var woodStorage = 15;
   var stone = 0;
+  var stoneBonus = 0;
   var stoneStorage = 10;
   var copper = 0;
+  var copperBonus = 0;
   var copperStorage = 10;
   var wrath = false;
   var showMaximums = false;
@@ -258,6 +262,49 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	}
 	repaintResources();
   }
+  function buyGranary(){
+	if (wood >= 15 && stone >= 10){
+		$("#buyGranaryButton").remove();
+		wood -= 15;
+		stone -= 10;
+		foodStorage *= 2;
+		alert("Golod seems to be angered by having plenty of resources.");
+	}
+  }
+  function buyWarehouse(){
+	if (wood >= 12 && stone >= 10){
+		$("#buyWarehouseButton").remove();
+		wood -= 12;
+		stone -= 10;
+		woodStorage *= 2;
+		stoneStorage *= 2;
+		copperStorage *= 2;
+		alert("Golod doesn't seem to be able to touch anything that is properly stored.");
+	}
+  }
+  function buyLoggingCamp(){
+	if (wood >= 20 && stone >= 10 && copper >=3){
+		$("#buyLoggingCampButton").remove();
+		wood -= 20;
+		stone -= 10;
+		copper -= 3;
+		woodBonus += 1;
+		alert("This logging camp will make it much easier to gather wood!");
+	}
+  }
+  function buyQuarryCamp(){
+	if (wood >= 10 && stone >= 20 && copper >=3){
+		$("#buyQuarryCampButton").remove();
+		wood -= 10;
+		stone -= 20;
+		copper -= 3;
+		stoneBonus += 1;
+		alert("This quarry camp will make it much easier to gather stone!");
+	}
+  }
+  function buyLoggingCamp(){
+  
+  }
   function completeChapter1(){
 	if (wood >= 12 && stone >= 5){
 		wood -= 12;
@@ -301,11 +348,13 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   
   function scroungeWheat(){
 	food += 2;
+	food += foodBonus;
 	repaintResources();
 	removeDie();
   }
   function farmWheat(amount){
 	food += amount;
+	food += foodBonus;
 	repaintResources();
 	removeDie();
 	removeCard("farm");
@@ -315,6 +364,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		return false;
 	}
 	food += 10;
+	food += foodBonus;
 	repaintResources();
 	removeDie();
 	removeCard("hunting");
@@ -324,6 +374,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		return false;
 	}
 	wood += amount - 3;
+	wood += woodBonus;
 	repaintResources();
 	removeDie();
 	removeCard("sticks");
@@ -333,6 +384,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	return false;
 	}
 	stone += 2;
+	stone += stoneBonus;
 	repaintResources();
 	removeDie();
 	removeCard("gatherStone");
@@ -460,6 +512,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		return false;
 	}
 	copper += 1;
+	copper += copperBonus;
 	repaintResources();
 	removeDie();
 	removeCard("mineCopper");
@@ -493,6 +546,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		return false;
 	}
 	wood += amount - 1;
+	wood += woodBonus;
 	repaintResources();
 	removeDie();
 	removeCard("logging");
@@ -502,6 +556,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	return false;
 	}
 	stone += amount + 1;
+	stone += stoneBonus;
 	repaintResources();
 	removeDie();
 	removeCard("quarry");
@@ -843,13 +898,13 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		let stoneDamage = 0;
 		if (wrathValue < Math.floor(Math.random() * 100)){ //Wrath strikes!
 			if (food > foodStorage){
-				foodDamage = Math.ceil((food - foodStorage)/4);
+				foodDamage = Math.ceil((food - foodStorage)/2);
 			}
 			if (wood > woodStorage){
-				woodDamage = Math.ceil((wood - woodStorage)/5);
+				woodDamage = Math.ceil((wood - woodStorage)/3);
 			}
 			if (stone > stoneStorage){
-				stoneDamage = Math.ceil((stone - stoneStorage)/10);
+				stoneDamage = Math.ceil((stone - stoneStorage)/3);
 			}
 			food -= foodDamage;
 			wood -= woodDamage;
