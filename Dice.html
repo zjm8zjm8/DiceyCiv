@@ -132,6 +132,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var copperBonus = 0;
   var copperStorage = 10;
   var wrath = false;
+  var wrathBlocked = 0;
   var showMaximums = false;
   var population = 2;
   var cardsAssigned = 0;
@@ -148,6 +149,10 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
   var completedScience = [];
   var expeditionCountdown = 35;
   
+  //Golod, lord of want			(famine)
+  //Krieg, master of discord	(war)
+  //Marad, scion of weakness	(pestilence)
+  //Morte, the final king		(death)
   
   window.onload = function(e){
 	//loadGame();
@@ -175,12 +180,12 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	document.getElementById("buttonArea").innerHTML += "<br>" +
 	"<button id=buyfarmButton onclick='buyfarmcard()'>Start Farming (requires 5 food)</button>" +
 	"<button id=buystickButton onclick='buystickcard()'>Start Gathering Sticks (requires 8 food)</button>" +
-	"<button id=completeChapter0Button onclick='completeChapter0()'>Build your first hut (requires 5 wood)</button>";
+	"<button class=final id=completeChapter0Button onclick='completeChapter0()'>Build your first hut (requires 5 wood)</button>";
   }
   function createChapter1Buttons(){
 	document.getElementById("buttonArea").innerHTML += "<button id=buylogButton onclick='buylogcard()'>Better Axes (requires 5 wood, 5 stone)</button>" +
 	"<button id=buyquarryButton onclick='buyquarrycard()'>Quarry Stone (requires 8 wood, 3 stone)</button>" +
-	"<button id=completeChapter1Button onclick='completeChapter1()'>Build A Grand Bonfire (requires 12 wood, 5 stone)</button>";
+	"<button class=final id=completeChapter1Button onclick='completeChapter1()'>Build A Grand Bonfire (requires 12 wood, 5 stone)</button>";
   }
   function createChapter2Buttons(){
 	document.getElementById("buttonArea").innerHTML += "<button id=buyGranaryButton onclick='buyGranary()'>Build Granary (requires 15 wood, 10 stone)</button>" + 
@@ -190,6 +195,10 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	document.getElementById("buttonArea").innerHTML += "<button id=buyLoggingCampButton onclick='buyLoggingCamp()'>Build Logging Camp (requires 20 wood, 10 stone, 3 copper)</button>" +
 	"<button id=buyQuarryCampButton onclick='buyQuarryCamp()'>Build Quarry Camp (requires 10 wood, 20 stone, 3 copper)</button>";
   }
+  function createLastChapter2Button(){
+	document.getElementById("buttonArea").innerHTML += "<button class=final id=completeChapter2Button onclick='completeChapter2()'>Build Temple (requires 20 wood, 20 stone, 5 copper)</button>";
+  }
+  
   function skipChapter0(){
 	day = 10;
 	food = 30;
@@ -213,6 +222,23 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	buylogcard();
 	buyquarrycard();
 	completeChapter1();
+  }
+  function skipChapter2(){
+	skipChapter1();
+	day = 60;
+	food = 50;
+	wood = 100;
+	stone = 100;
+	copper = 30;
+	discoverWriting(10);
+	discoverCopper(2);
+	discoverCopper(2);
+	discoverExpedition(35);
+	buyGranary();
+	buyWarehouse();
+	buyQuarryCamp();
+	buyLoggingCamp();
+	completeChapter2();
   }
   
   function buyfarmcard(){
@@ -268,7 +294,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		wood -= 15;
 		stone -= 10;
 		foodStorage *= 2;
-		alert("Golod seems to be angered by having plenty of resources.");
+		document.getElementById('messageArea').innerHTML = "Golod seems to be angered by having plenty of resources.";
+		repaintResources();
 	}
   }
   function buyWarehouse(){
@@ -279,7 +306,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		woodStorage *= 2;
 		stoneStorage *= 2;
 		copperStorage *= 2;
-		alert("Golod doesn't seem to be able to touch anything that is properly stored.");
+		document.getElementById('messageArea').innerHTML = "Golod doesn't seem to be able to touch anything that is properly stored.";
+		repaintResources();
 	}
   }
   function buyLoggingCamp(){
@@ -289,7 +317,8 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		stone -= 10;
 		copper -= 3;
 		woodBonus += 1;
-		alert("This logging camp will make it much easier to gather wood!");
+		document.getElementById('messageArea').innerHTML = "This logging camp will make it much easier to gather wood!";
+		repaintResources();
 	}
   }
   function buyQuarryCamp(){
@@ -299,11 +328,29 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		stone -= 20;
 		copper -= 3;
 		stoneBonus += 1;
-		alert("This quarry camp will make it much easier to gather stone!");
+		document.getElementById('messageArea').innerHTML = "This quarry camp will make it much easier to gather stone!";
+		repaintResources();
 	}
   }
-  function buyLoggingCamp(){
-  
+  function completeChapter2(){
+	if (wood >= 20 && stone >= 20 && copper >= 5){
+		wood -=20;
+		stone -=20;
+		copper -=5;
+		$("#completeChapter2Button").remove();
+		$("#victoryAudio")[0].play();
+		organizeCooldown = 0;
+		paintOrganizeTab();
+		repaintResources();
+		// add new cards
+		/*
+			discoveryLogistics, readyTroops, 
+		*/
+		
+		alert("The moment you finished the temple, you received a strange visit. A rivaling tribe of strange looking dice who call themselves the Deephors introduce themselves. You can feel the tension in the air. They are jealous of your accomplishments and look at your supplies hungrily. Kreig, master of discord, must be whispering in their ears. You must defend yourself!");
+		alert("Also, fair warning, this next bit is part of the now-incomplete next chapter.");
+		
+	}
   }
   function completeChapter1(){
 	if (wood >= 12 && stone >= 5){
@@ -312,7 +359,6 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		$("#completeChapter1Button").remove();
 		$("#victoryAudio")[0].play();
 		alert("You have begun the spark of civilization! The FOUR DICEMEN will surely come after you now. Be prepared to weather their tempests, as there is nothing that could possibly fight a god. Or is there? Your new kingdom will now need to grow even further. Perhaps you will rival the heights of the old kingdom?");
-		alert("Also, fair warning, this next bit is part of the now-incomplete next chapter.");
 		population = 3;
 		wrath = true;
 		createChapter2Buttons();
@@ -460,7 +506,23 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	}
   }
   function discoverExpedition(amountIn){
-	//Build me out, takes three dice, success if 15+.
+	expeditionCountdown -= amountIn;
+	repaintCard("discoveryExpedition");
+	removeDie();
+	if (expeditionCountdown <= 0){
+		// TODO: Do the unlocking thing.
+		removeCard("discoveryExpedition");
+		removeCardFromSlots("discoveryExpedition");
+		completedScience.push("discoveryExpedition");
+		organizeCooldown = 0;
+		paintOrganizeTab();
+		// Grant the 'protectGolod' Card
+		addCardToCardsList("protectGolod");
+		addCardToSlots("protectGolod");
+		// Do the alert cinematic.
+		createLastChapter2Button();
+		alert("As you sift through the ruins of the old city, you learn two things. One, you have not found the great city of legend. Two, you have angered Golod, lord of want. His touch ruins, and he is jealous of your abundance. You found a temple in the old city, and learned a spell that will protect you from him, for a time. You must build a temple now.");
+	}
   }
   function discoverWriting(amountIn){
 	if(amountIn != 10){
@@ -517,6 +579,12 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 	removeDie();
 	removeCard("mineCopper");
   }
+  function protectFromGolod(amount){
+	wrathBlocked = 1;
+	removeDie();
+	removeCard("protectGolod");
+  }
+  
   function progressStone(amount){
 	if (secondDieStorage.progressStone == 0 || secondDieStorage.progressStone == null){
 		secondDieStorage.progressStone = Number(amount);
@@ -794,6 +862,17 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 					return "<div id='discoveryExpeditionSmall' class='orgCard science' onclick='orgCardAdd(\"discoveryExpedition\")'>Expedition<BR>Research.<Br>Countdown<br>"+expeditionCountdown+"</div>";
 				}
 				break;
+			case "protectGolod":
+				if (type == "regular"){
+					return "<div id='protectGolod' class='card magic'>Protect From Golod<BR>Stop the waste of resources<Br><br><img src='./images/emptydie.png' ondrop='drop(event, protectFromGolod)' ondragover='allowDrop(event)'></img></div>";
+				}
+				else if (type == "org"){
+					return "<div id='protectGolodBig' class='card magic' onclick='orgCardRemove(\"protectGolod\")'>Protect From Golod<br>Stop the waste of resources<Br><br>1 Die</div>";
+				}
+				else if (type == "orgSmall"){
+					return "<div id='protectGolodSmall' class='orgCard magic' onclick='orgCardAdd(\"protectGolod\")'>P. Golod<BR>Protect<Br><br>1 Die</div>";
+				}
+				break;
 			default:
 				return "";
 				break;
@@ -824,7 +903,14 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 			if (isOrg == true){
 				cardstr = "orgCardArea" + (position+1) + "";
 			}
-			document.getElementById(cardstr).innerHTML += cardData;
+			document.getElementById(cardstr).innerHTML = cardData;
+		}
+	}
+	function repaintCard(cardName){
+		for (let i = 0; i < 8; i++){
+			if (orgCardSlots[i] == cardName){
+				addCard(getCardData(cardName, "regular"), i, false);
+			}
 		}
 	}
 	function removeCardFromSlots(cardName){
@@ -892,6 +978,11 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		}
 	}
 	function computeWrath(){
+		if (wrathBlocked > 0){
+			wrathBlocked--;
+			document.getElementById("messageArea").innerHTML = "You have protected yourself from Golod. For now.";
+			return false;
+		}
 		let wrathValue = Math.max(0, food - foodStorage) + Math.max(0, wood - woodStorage) + Math.max(0, stone - stoneStorage);
 		let foodDamage = 0;
 		let woodDamage = 0;

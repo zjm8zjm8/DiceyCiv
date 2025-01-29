@@ -72,6 +72,10 @@
 	background-color: #80E5FF;
 }
 
+.organization{
+	background-color: #5D5DFF
+}
+
 .stone{
 	background-color: #CCCCCC;
 }
@@ -81,13 +85,14 @@
 	color: #FFFFFF;
 }
 
+.magic{
+	background-color: #B444D3;
+}
+
 .invisible{
 	visibility: hidden;
 }
 
-.organization{
-	background-color: #5D5DFF
-}
 
 button{
 	background-color: #EEEEFF;
@@ -95,4 +100,8 @@ button{
 	width: 350px;
 	border-radius: 5px;
 	display: block;
+}
+
+button .final{
+	background-color: #98D793;
 }
