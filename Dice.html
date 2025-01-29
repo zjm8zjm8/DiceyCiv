@@ -348,7 +348,7 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 		*/
 		
 		alert("The moment you finished the temple, you received a strange visit. A rivaling tribe of strange looking dice who call themselves the Deephors introduce themselves. You can feel the tension in the air. They are jealous of your accomplishments and look at your supplies hungrily. Kreig, master of discord, must be whispering in their ears. You must defend yourself!");
-		alert("Also, fair warning, this next bit is part of the now-incomplete next chapter.");
+		alert("Congratulations! You've completed the game, for now.");
 		
 	}
   }
@@ -864,10 +864,10 @@ https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js
 				break;
 			case "protectGolod":
 				if (type == "regular"){
-					return "<div id='protectGolod' class='card magic'>Protect From Golod<BR>Stop the waste of resources<Br><br><img src='./images/emptydie.png' ondrop='drop(event, protectFromGolod)' ondragover='allowDrop(event)'></img></div>";
+					return "<div id='protectGolod' class='card magic'>Protect From Golod<BR>Stay his hand.<Br><br><img src='./images/emptydie.png' ondrop='drop(event, protectFromGolod)' ondragover='allowDrop(event)'></img></div>";
 				}
 				else if (type == "org"){
-					return "<div id='protectGolodBig' class='card magic' onclick='orgCardRemove(\"protectGolod\")'>Protect From Golod<br>Stop the waste of resources<Br><br>1 Die</div>";
+					return "<div id='protectGolodBig' class='card magic' onclick='orgCardRemove(\"protectGolod\")'>Protect From Golod<br>Stay his hand.<Br><br>1 Die</div>";
 				}
 				else if (type == "orgSmall"){
 					return "<div id='protectGolodSmall' class='orgCard magic' onclick='orgCardAdd(\"protectGolod\")'>P. Golod<BR>Protect<Br><br>1 Die</div>";
