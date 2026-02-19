@@ -1,0 +1,69 @@
+Chapter 0 - The tutorial
+- Introduce concepts, food, and wood.
+
+Chapter 1 - Gentle easing in
+- Introduce stone, organization, and research.
+- Expand on wood
+
+Chapter 2 - Golod and the third die
+- Introduce copper, Golod, and Magic. 
+- Organization tab
+- Expand on stone, organization. 
+
+Chapter 3 - Krieg and rival tribes
+- Introduce war, trade
+- Research: Numismatics (unlocks trade) (Needs straight)
+- Research: Logisitcs (unlocks scout outpost) (Needs triple)
+- Research: Smithing (unlocks preemptive strike) (Needs pair of fives)
+- When numismatics is researched, you can receive trade requests and gold is unlocked as a resource.
+- Numismatics also grants a new spell "Bless" (Needs 3), which grants an extra die on the next turn.
+- Scout outpost: Needs 40 food, 10 wood, 5 stone
+	-Built outpost gives warnings when the Deephors are at 25% (12), 50% (22), and 80% (36) aggression.
+	-"Deephors are holding drills."
+	-"Deephors are stockpiling weapons."
+	-"Deephors are gathering for war."
+	-"Deephors attack! You have lost xyz..."
+- Preemptive strike unlocks "Pacify Deephors" (Min 5)
+	- Also unlocks button "Build more weaponry" (24 wood, 12 stone, 8 copper)
+		-That unlocks "Pacify Deephors+" (Min 3)
+		-Next button is "Build better armor" (8 wood, 8 stone, 10 copper)
+			-Unlocks "Pacify Deephors++" (Min 1)
+	- Preemptive strike also reduces Deephor population by 1, to a minimum of 1.
+	- Preemptive strike grants honor when used.
+- Final goal is to build shrine, which takes honor and gold in addition to copper, iron, wood, and stone.
+
+Trade:
+
+50 food = 30 wood = 20 stone = 10 copper = 5 iron = 1 gold
+
+Deephors keep 10% as tariff
+
+1 Gold = 45 food = 27 wood = 18 stone = 9 copper = 4 iron
+
+War:
+
+Deephors roll dice and play a hidden game alongside the player. 
+Each day, they roll a die and get some bonus.
+Day 1: Food
+ - Deephors roll 1d4. If they get a 4, they grow.
+ - If they get a 2 or 3, they do not grow.
+ - If they get a 1, they shrink.
+ - Population in this section is X.
+Day 2: Resources
+ - Deephors roll 2d4. If they get a...
+	-2, Copper/Iron will be the next trade.
+	-3, Stone will be the next trade.
+	-4, Wood/Food will be the next trade.
+	-5, Gold for Food will be the next trade.
+	-6, Gold for Wood will be the next trade.
+	-7, Gold for Stone will be the next trade.
+	-8, Gold for Copper/Iron will be the next trade.
+Day 3: War
+ - Deephors roll Xd4. The total is added to the war total.
+ - Once the war total reaches 45 (EV of 24 days or 6 Deephorian weeks) they attack.
+ - Total can be revealed by scouting, reduced by preemptive strike.
+ - An attack will select a random resource and drain it to 25% full.
+Day 4: Trade
+ - Deephors roll Xd4. The total is added to the trade total.
+ - The sum is added to the trade price and then 10 is subtracted.
+ - The trade is offered up
